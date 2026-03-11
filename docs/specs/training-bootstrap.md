@@ -1,6 +1,6 @@
 # Training Bootstrap Specification
 
-Related specs: [architecture](architecture.md), [runtime](runtime.md), [open questions](open-questions.md), [bibliography](bibliography.md).
+Related specs: [architecture](architecture.md), [runtime](runtime.md), [research synthesis](research-synthesis.md), [open questions](open-questions.md), [bibliography](bibliography.md).
 
 ## Scope
 This document defines how the system is initialized and evolved from pre-runtime setup into live operation.
