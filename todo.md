@@ -80,14 +80,14 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] Define policy for external training proposals injected as L1 deltas.
 
 ### G. Turn open questions into decision records
-- [ ] Create a decision-log section or ADR-style folder for major unresolved questions.
-- [ ] For each open question, assign:
-  - [ ] owner,
-  - [ ] evidence required,
-  - [ ] validation method,
-  - [ ] deadline/checkpoint,
-  - [ ] fallback decision if evidence is inconclusive.
-- [ ] Start with the 4 near-term validation priorities from `open-questions.md`.
+- [x] Create a decision-log section or ADR-style folder for major unresolved questions.
+- [x] For each open question, assign:
+  - [x] owner,
+  - [x] evidence required,
+  - [x] validation method,
+  - [x] deadline/checkpoint,
+  - [x] fallback decision if evidence is inconclusive.
+- [x] Start with the 4 near-term validation priorities from `open-questions.md`.
 
 ### H. Formalize safety and rollback policy variants
 - [ ] Define whether partial-accept rollback mode will exist in v1 simulator semantics.

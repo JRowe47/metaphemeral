@@ -1,6 +1,6 @@
 # Open Questions
 
-Related specs: [architecture](architecture.md), [runtime](runtime.md), [activation store](activation-store.md), [training bootstrap](training-bootstrap.md), [glossary](glossary.md), [bibliography](bibliography.md).
+Related specs: [architecture](architecture.md), [runtime](runtime.md), [activation store](activation-store.md), [training bootstrap](training-bootstrap.md), [decision log](decision-log.md), [glossary](glossary.md), [bibliography](bibliography.md).
 
 This file tracks unresolved design choices and research risks. Items here are intentionally non-final.
 
@@ -55,7 +55,10 @@ Decision checkpoint (linked to runtime evaluation protocol):
 - How should we detect unproductive depth versus useful exploration?
 
 ## Near-term validation priorities
-1. Freeze a provisional L1 schema and run simulator traces.
-2. Stress-test activation-store overflow behavior.
-3. Benchmark routing stability under sparse and bursty traffic.
-4. Compare executor options on traceability and latency.
+
+The following priorities are tracked as decision records with explicit owner, evidence requirements, validation method, checkpoint, and fallback decision path.
+
+1. Freeze a provisional L1 schema and run simulator traces. See [DLR-001](decision-log.md#dlr-001--provisional-l1-schema-freeze-for-replayable-traces).
+2. Stress-test activation-store overflow behavior. See [DLR-002](decision-log.md#dlr-002--activation-store-overflow-policy-acceptance).
+3. Benchmark routing stability under sparse and bursty traffic. See [DLR-003](decision-log.md#dlr-003--routing-stability-under-sparse-vs-bursty-load).
+4. Compare executor options on traceability and latency. See [DLR-004](decision-log.md#dlr-004--executor-protocol-selection-flow-vs-block-diffusion).
