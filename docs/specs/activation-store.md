@@ -98,13 +98,69 @@ Backpressure actions:
 
 ## Overflow policy
 On approaching or exceeding store limits:
-1. Drop expired frames first.
-2. Evict lowest-value blocked frames.
-3. Demote non-critical deliberation tasks.
-4. Emit overflow signal packet.
-5. If unresolved, trigger reflex quarantine mode.
+1. Run `expiry_sweep` and drop all frames where `ttl <= current_tick`.
+2. If usage is still above `soft_limit`, run deterministic eviction by configured objective mode.
+3. If usage is still above `hard_limit`, demote non-critical deliberation frames to `blocked` with `overflow_backoff_until_tick`.
+4. If usage is still above `hard_limit` after one demotion pass, emit an `overflow_signal` packet to reflex.
+5. If usage stays above `hard_limit` for `quarantine_window_ticks`, trigger reflex quarantine mode.
 
-**Open question:** optimal eviction objective under mixed-modal loads.
+- **Project synthesis:** this precedence order is the simulator default policy.
+
+### Deterministic eviction objective modes
+The store MUST use one configured mode per address class for predictable replay.
+
+1. `recency_preserve` (default for reflex-heavy workloads)
+   - Score: `(is_reflex_critical, -updated_tick, -priority, dependency_fanout)`.
+   - Evict ascending score (lowest first).
+2. `priority_preserve` (default for mixed workloads)
+   - Score: `(is_reflex_critical, priority, -updated_tick, dependency_fanout)`.
+   - Evict ascending score.
+3. `dependency_preserve` (default for deliberation-heavy workloads)
+   - Score: `(is_reflex_critical, dependency_fanout, priority, -updated_tick)`.
+   - Evict ascending score.
+
+Where:
+- `is_reflex_critical` is `1` for reflex/safety frames, `0` otherwise.
+- `dependency_fanout` is the number of children that directly depend on this frame.
+
+### Tie-break order (all modes)
+If multiple frames have identical score tuples, break ties in this exact order:
+1. older `created_tick` first,
+2. lexicographically smaller `trace_id` first,
+3. lexicographically smaller `handle_id` first.
+
+This tie-break order is required for deterministic simulator replay.
+
+### Recommended capacity bands by workload class
+- **Project synthesis:** per-address defaults for simulator baselines.
+
+| Workload class | `soft_limit` (frames) | `hard_limit` (frames) | Default mode |
+| --- | ---: | ---: | --- |
+| reflex-heavy | 96 | 128 | `recency_preserve` |
+| balanced | 192 | 256 | `priority_preserve` |
+| deliberation-heavy | 384 | 512 | `dependency_preserve` |
+
+Constraint: `hard_limit` MUST be at least `1.25 * soft_limit`.
+
+### Dangling-handle prevention and cleanup
+To prevent stale `payload_ref` and dependency references:
+1. Every eviction writes a `tombstone` record for `handle_id` with `evicted_tick` and `trace_id`.
+2. Any frame listing a tombstoned handle in `dependencies` is marked `blocked_missing_dependency`.
+3. `blocked_missing_dependency` frames are retried for `retry_window_ticks`.
+4. If dependency is not restored by retry expiry, frame is dropped with reason `dependency_timeout`.
+
+- **Project synthesis:** tombstones are local-only metadata and are not persisted as L1 state.
+
+### Overflow stress scenarios (simulator acceptance tests)
+1. **Burst ingress, reflex-priority protection**
+   - Setup: start at 80% of `soft_limit`; inject burst to 140% of `hard_limit` with mixed priorities.
+   - Expected: all expired frames removed first, reflex-critical frames survive first eviction pass, overflow signal emitted.
+2. **Dependency fanout preservation under deliberation load**
+   - Setup: `dependency_preserve` mode with DAG-shaped traces and 20% random TTL expiry.
+   - Expected: high-fanout parents survive longer than leaf frames; dependency-timeout drops are logged.
+3. **Aggressive clear during backlog**
+   - Setup: invoke `clear(trace_id)` while store is above `soft_limit`.
+   - Expected: tombstones generated, dependent frames move to `blocked_missing_dependency`, no unresolved handle references remain after retry window.
 
 ## Why this is not a simple vector summary
 A vector summary collapses temporal and dependency structure into one representation. The activation stack store retains explicit, queryable, and schedulable units with lineage and control metadata. This supports fine-grained rollback, debugging, and pressure-aware scheduling that would be hidden in a single summary embedding.
