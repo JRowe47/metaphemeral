@@ -144,6 +144,54 @@ Rollback guarantees:
 
 **Open question:** whether rollback should include selective partial-accept mode.
 
+## Executor evaluation protocol (v0 simulator milestone)
+- **Project synthesis:** this protocol defines how to compare flow-based and block-diffusion executors under shared tasks and observability constraints.
+
+### Shared benchmark task set
+Both executor families must run the same tasks:
+1. **Reflex correction task**
+   - Input: safety-sensitive packet with malformed route metadata.
+   - Goal: emit corrected urgent packet within reflex budget.
+2. **Deliberation reroute task**
+   - Input: bursty fan-in causing capability contention.
+   - Goal: propose stable reroute delta without violating fairness guardrails.
+3. **Rollback recovery task**
+   - Input: deliberation proposal with synthetic dependency gap.
+   - Goal: produce trace that cleanly rolls back and recovers next tick.
+4. **Mixed-load continuity task**
+   - Input: alternating sparse and bursty traffic over a fixed horizon.
+   - Goal: maintain bounded latency while preserving trace clarity.
+
+### Mandatory metrics
+For every run, record:
+- `latency_ms_p50`, `latency_ms_p95` per task,
+- `trace_clarity_score` (fraction of ticks with complete required metadata from [tick trace](tick-trace.md)),
+- `correction_stability` (fraction of post-correction ticks that avoid repeated same-class failure within `N_stability` ticks),
+- `rollback_rate` (rolled-back commits / total commit attempts).
+
+### Acceptable operating envelopes by plane
+Reflex envelope:
+- p95 latency must remain within the configured reflex budget.
+- rollback rate should stay below `reflex_rollback_ceiling` for safety-class tasks.
+
+Deliberation envelope:
+- p95 latency may exceed reflex budget but must remain below deliberation budget.
+- correction stability must exceed `deliberation_stability_floor` on reroute and mixed-load tasks.
+
+### Decision rule: preferred executor selection
+1. Disqualify any executor that violates reflex envelope on reflex correction task.
+2. Among qualified executors, rank by:
+   - lower rollback rate,
+   - higher trace clarity score,
+   - lower p95 latency on mixed-load continuity.
+3. If rankings are within tie margin `epsilon_tie`, keep both behind a runtime feature flag and mark outcome as unresolved in [open questions](open-questions.md).
+
+### Validation artifact requirements
+Each benchmark run must produce:
+- task configuration file,
+- aggregated metric table,
+- sample trace bundle containing at least one accepted and one rolled-back commit.
+
 See [tick-trace.md](tick-trace.md) for a canonical record shape and one-tick worked example.
 
 ## Full compute-cycle walkthrough (plain English)

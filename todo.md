@@ -55,16 +55,16 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] Specify admission/throttle logic when token buckets are depleted.
 
 ### D. Establish baseline tick-level observability contract
-- [ ] Define required trace metadata per tick (ids, pressure snapshots, schedule decisions, outcome).
-- [ ] Define “minimum debug packet” content for reproducible replay.
-- [ ] Define rollback event schema (reason, violated guardrail, dependency gap details).
+- [x] Define required trace metadata per tick (ids, pressure snapshots, schedule decisions, outcome).
+- [x] Define “minimum debug packet” content for reproducible replay.
+- [x] Define rollback event schema (reason, violated guardrail, dependency gap details).
 - [x] Add a canonical one-tick trace example spanning mailbox → store → scheduler → commit.
 
 ### E. Decide first-pass executor evaluation protocol
-- [ ] Define shared benchmark tasks for flow-based and block-diffusion executors.
-- [ ] Define mandatory metrics: latency, trace clarity, correction stability, rollback rate.
-- [ ] Define acceptable operating envelopes by plane (reflex/deliberation budget constraints).
-- [ ] Record decision rule for when one executor is preferred over the other.
+- [x] Define shared benchmark tasks for flow-based and block-diffusion executors.
+- [x] Define mandatory metrics: latency, trace clarity, correction stability, rollback rate.
+- [x] Define acceptable operating envelopes by plane (reflex/deliberation budget constraints).
+- [x] Record decision rule for when one executor is preferred over the other.
 
 ---
 
@@ -153,9 +153,9 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] Add stress-test scenario definitions and expected outcomes.
 
 ### Work package 3: Executor comparison protocol
-- [ ] Define shared tasks/metrics.
-- [ ] Define decision thresholds and deployment recommendations.
-- [ ] Capture unresolved tradeoffs as Open questions with checkpoints.
+- [x] Define shared tasks/metrics.
+- [x] Define decision thresholds and deployment recommendations.
+- [x] Capture unresolved tradeoffs as Open questions with checkpoints.
 
 ---
 
@@ -166,4 +166,3 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [ ] Relevant checks/manual validations listed.
 - [ ] Risks and unvalidated assumptions explicitly called out.
 - [ ] New unresolved decisions recorded as Open questions with validation path.
-

@@ -19,6 +19,11 @@ This file tracks unresolved design choices and research risks. Items here are in
 - Is a unified abstract executor interface sufficient, or do we need modality-specific wrappers?
 - What observability primitives are needed to compare executor behavior fairly?
 
+Decision checkpoint (linked to runtime evaluation protocol):
+- Run shared benchmark tasks and compare latency/trace clarity/correction stability/rollback rate.
+- If results are within tie margin `epsilon_tie`, keep both executors feature-flagged and defer hard selection.
+- Checkpoint trigger: after first complete benchmark artifact bundle is produced.
+
 ## 4) Routing semantics at scale
 - How should capability routing resolve collisions under high fan-in?
 - Should capability beacons decay continuously or in stepwise epochs?
