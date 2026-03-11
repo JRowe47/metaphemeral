@@ -44,6 +44,7 @@ See details in:
 - [Runtime spec](docs/specs/runtime.md)
 - [Activation store spec](docs/specs/activation-store.md)
 - [Training bootstrap](docs/specs/training-bootstrap.md)
+- [Research synthesis](docs/specs/research-synthesis.md)
 - [Open questions](docs/specs/open-questions.md)
 - [Glossary](docs/specs/glossary.md)
 - [Annotated bibliography](docs/specs/bibliography.md)
@@ -55,6 +56,7 @@ See details in:
 - `docs/specs/runtime.md` — cycle semantics, scheduling, routing.
 - `docs/specs/activation-store.md` — explicit activation caching model.
 - `docs/specs/training-bootstrap.md` — staged initialization and learning plan.
+- `docs/specs/research-synthesis.md` — mapping from weight-generation literature to runtime use.
 - `docs/specs/open-questions.md` — unresolved decisions and validation needs.
 - `docs/specs/glossary.md` — shared terminology.
 - `docs/specs/bibliography.md` — linked paper map with relevance notes.

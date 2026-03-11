@@ -1,6 +1,6 @@
 # Architecture Specification
 
-Related specs: [runtime](runtime.md), [activation store](activation-store.md), [training bootstrap](training-bootstrap.md), [open questions](open-questions.md), [glossary](glossary.md), [bibliography](bibliography.md).
+Related specs: [runtime](runtime.md), [activation store](activation-store.md), [training bootstrap](training-bootstrap.md), [research synthesis](research-synthesis.md), [open questions](open-questions.md), [glossary](glossary.md), [bibliography](bibliography.md).
 
 ## Overview
 Metaphemeral Network is modeled as a fixed-address hex lattice of compute cells. Each cell holds persistent L1 state and can generate short-lived L2/L3 behaviors during execution. The architecture is message-driven: packets move across the lattice and trigger local expert execution.

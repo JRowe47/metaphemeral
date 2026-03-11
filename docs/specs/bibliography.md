@@ -1,6 +1,6 @@
 # Annotated Bibliography
 
-Related docs: [architecture](architecture.md), [runtime](runtime.md), [training bootstrap](training-bootstrap.md), [open questions](open-questions.md).
+Related docs: [architecture](architecture.md), [runtime](runtime.md), [training bootstrap](training-bootstrap.md), [research synthesis](research-synthesis.md), [open questions](open-questions.md).
 
 This bibliography groups references by architectural role. Tags indicate how each source is used here:
 - `[paper-backed component]` = direct support for a component class.
@@ -12,17 +12,17 @@ This bibliography groups references by architectural role. Tags indicate how eac
 ### Diffusion-Based Neural Network Weights Generation
 Link: https://arxiv.org/abs/2402.18153  
 Tag: `[paper-backed component]`  
-Relevance: Demonstrates diffusion-style generation in weight space, useful for evaluating whether generated expert parameters can be practical initialization candidates.
+Relevance: Demonstrates conditional latent-space generation of network weights from context and supports the project pattern for context-conditioned expert spawning.
 
 ### DeepWeightFlow: Re-Basined Flow Matching for Generating Neural Network Weights
 Link: https://arxiv.org/abs/2601.05052  
 Tag: `[paper-backed component]`  
-Relevance: Provides a flow-matching perspective for weight generation that may offer alternatives to diffusion sampling when latency is constrained.
+Relevance: Demonstrates direct flow matching in full weight space with symmetry-aware preprocessing, supporting fast direct generation of runnable expert weights.
 
 ### Flows and Diffusions on the Neural Manifold
 Link: https://arxiv.org/abs/2507.10623  
 Tag: `[supporting reference]`  
-Relevance: Frames weight-space generation as manifold-aware transport, informing canonicalization discussions for generated experts.
+Relevance: Frames weight generation as manifold-aware trajectory modeling, supporting L1 evolution strategies that use training dynamics as priors.
 
 ### Unified Latents (UL): How to train your latents
 Link: https://arxiv.org/abs/2602.17270  

@@ -40,3 +40,12 @@ A repo-specific design decision or integration that is not claimed as directly e
 
 ## paper-backed component
 A component category whose core mechanism is supported by cited literature in [bibliography](bibliography.md), while still requiring project-specific integration details.
+
+## conditional spawning
+Runtime generation of expert weights or routines from L1 state plus immediate context, rather than loading fixed pre-bound modules.
+
+## canonicalization
+Preprocessing of weight sets to reduce permutation-symmetry mismatch before fitting a generator in full weight space.
+
+## trajectory prior
+A training prior derived from optimization paths (not only final checkpoints), used to constrain or guide generated weight evolution.
