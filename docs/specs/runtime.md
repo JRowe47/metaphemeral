@@ -47,9 +47,51 @@ Packet targets specific destination address(es).
 ### Group/capability routing
 Packet targets a capability label instead of concrete address.
 - Runtime resolves recipients by current beacons/routing priors.
-- Resolution may be probabilistic or top-k constrained.
+- Resolution uses deterministic candidate ranking with bounded randomized fallback.
 
-**Open question:** stable semantics for capability resolution under heavy load.
+- **Project synthesis:** the following collision and fairness rules are simulator defaults.
+
+#### Capability collision-resolution semantics
+For each capability-routed packet:
+1. Build candidate set from addresses with unexpired capability beacons.
+2. Score each candidate with:
+   - `score = beacon_weight * capability_match * freshness_factor * load_penalty`.
+3. Select recipients with a hybrid policy:
+   - pick top `k_primary` by score,
+   - sample up to `k_explore` additional candidates from the remaining top `explore_window` using score-proportional randomization.
+4. De-duplicate recipients and enforce per-packet `max_recipients`.
+
+Tie-break order for equal score: smaller `last_assigned_tick`, then lexicographically smaller address id.
+
+#### Fairness and starvation guardrails
+To avoid repeated high fan-in starving less frequent experts:
+- Track `consecutive_skips` per capability candidate.
+- If `consecutive_skips >= starvation_threshold`, candidate receives temporary `fairness_boost` multiplier until selected.
+- Enforce `max_assignments_per_tick` per destination for capability traffic.
+- If all candidates are throttled, emit `capability_backpressure` and retry next tick.
+
+#### Beacon refresh/decay and observability fields
+Capability beacons use stepwise decay:
+- On refresh: set `beacon_epoch = current_tick` and `beacon_strength = 1.0`.
+- Every `beacon_decay_interval_ticks`, apply `beacon_strength *= beacon_decay_factor`.
+- Beacon expires when `beacon_strength < beacon_expiry_threshold`.
+
+Required per-candidate observability fields:
+- `beacon_epoch`, `beacon_strength`, `last_refresh_tick`,
+- `last_assigned_tick`, `consecutive_skips`,
+- `throttle_state` and current token-bucket balance.
+
+
+#### Routing policy examples by mode
+1. Neighbor traffic (local diffusion)
+   - Scenario: low-priority context sharing to adjacent addresses.
+   - Policy: send to all neighbors while `neighbor` bucket has tokens; if depleted, coalesce payload and defer.
+2. Explicit traffic (direct service call)
+   - Scenario: reply packet to a known specialist address from prior trace.
+   - Policy: reserve explicit bucket budget for replies before new deliberation emissions.
+3. Capability traffic (elastic discovery)
+   - Scenario: packet tagged `capability=temporal-repair` with no fixed destination.
+   - Policy: apply hybrid `k_primary + k_explore` recipient selection and fairness boost rules under high fan-in.
 
 ## Interrupts, escalation, and reflex triggers
 Interrupt sources include:
@@ -63,6 +105,22 @@ Escalation path:
 2. optional throttling/quarantine packet emission,
 3. optional deliberation request with elevated priority,
 4. post-action cooldown update in L1 metadata.
+
+
+## Admission and throttling with depleted token buckets
+- **Project synthesis:** admission rules align routing behavior with local backpressure policy.
+
+For each outbound packet attempt:
+1. Identify route bucket (`neighbor`, `explicit`, or `capability`).
+2. If bucket has sufficient tokens, admit and deduct cost.
+3. If insufficient tokens:
+   - admit only if packet is reflex-critical and `emergency_reserve` tokens remain,
+   - otherwise defer packet and increment `throttle_count`.
+4. If `throttle_count` exceeds `throttle_escalation_threshold`, emit overflow/backpressure signal to reflex plane.
+
+Defer queue policy:
+- Priority order: reflex-critical > safety > explicit reply > deliberation.
+- Deferred packets older than `defer_ttl_ticks` are dropped with reason `throttle_expiry`.
 
 ## State update and commit
 During a tick, experts work on transient deltas. Durable change occurs only at commit:

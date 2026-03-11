@@ -41,18 +41,18 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] Record unresolved parts as Open questions with explicit validation plan.
 
 ### B. Specify activation-store capacity and overflow behavior
-- [ ] Convert overflow policy into a deterministic rule set with tie-break order.
-- [ ] Define recommended per-address capacity bands by workload class (reflex-heavy vs deliberation-heavy).
-- [ ] Specify eviction objective tradeoff mode(s): recency, priority, dependency completeness.
-- [ ] Add overflow stress scenarios and expected outcomes to docs.
-- [ ] Define dangling-handle prevention/cleanup policy under aggressive clear/evict operations.
+- [x] Convert overflow policy into a deterministic rule set with tie-break order.
+- [x] Define recommended per-address capacity bands by workload class (reflex-heavy vs deliberation-heavy).
+- [x] Specify eviction objective tradeoff mode(s): recency, priority, dependency completeness.
+- [x] Add overflow stress scenarios and expected outcomes to docs.
+- [x] Define dangling-handle prevention/cleanup policy under aggressive clear/evict operations.
 
 ### C. Lock routing semantics under load
-- [ ] Define capability routing collision-resolution semantics (top-k, weighted random, or hybrid).
-- [ ] Define fairness and starvation guardrails for repeated high fan-in.
-- [ ] Define beacon refresh/decay rules and their observability fields.
-- [ ] Add routing policy examples for neighbor vs explicit vs capability traffic.
-- [ ] Specify admission/throttle logic when token buckets are depleted.
+- [x] Define capability routing collision-resolution semantics (top-k, weighted random, or hybrid).
+- [x] Define fairness and starvation guardrails for repeated high fan-in.
+- [x] Define beacon refresh/decay rules and their observability fields.
+- [x] Add routing policy examples for neighbor vs explicit vs capability traffic.
+- [x] Specify admission/throttle logic when token buckets are depleted.
 
 ### D. Establish baseline tick-level observability contract
 - [ ] Define required trace metadata per tick (ids, pressure snapshots, schedule decisions, outcome).
@@ -148,9 +148,9 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] Verify compatibility with rollback and commit rules.
 
 ### Work package 2: Activation overflow + routing load semantics
-- [ ] Finalize overflow rule precedence and capacity recommendations.
-- [ ] Finalize capability collision and fairness semantics.
-- [ ] Add stress-test scenario definitions and expected outcomes.
+- [x] Finalize overflow rule precedence and capacity recommendations.
+- [x] Finalize capability collision and fairness semantics.
+- [x] Add stress-test scenario definitions and expected outcomes.
 
 ### Work package 3: Executor comparison protocol
 - [ ] Define shared tasks/metrics.
