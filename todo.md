@@ -71,13 +71,13 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 ## P1 — Near-term (bootstrap and integration readiness)
 
 ### F. Convert training-bootstrap roadmap into milestone checklist
-- [ ] For each staged step (replicators → tiny experts → routing → async signaling → weight generation → modality executors), add:
-  - [ ] entry criteria,
-  - [ ] measurable exit criteria,
-  - [ ] required artifacts,
-  - [ ] failure/rollback conditions.
-- [ ] Define “live-start readiness” gate checklist before marking runtime live.
-- [ ] Define policy for external training proposals injected as L1 deltas.
+- [x] For each staged step (replicators → tiny experts → routing → async signaling → weight generation → modality executors), add:
+  - [x] entry criteria,
+  - [x] measurable exit criteria,
+  - [x] required artifacts,
+  - [x] failure/rollback conditions.
+- [x] Define “live-start readiness” gate checklist before marking runtime live.
+- [x] Define policy for external training proposals injected as L1 deltas.
 
 ### G. Turn open questions into decision records
 - [ ] Create a decision-log section or ADR-style folder for major unresolved questions.
