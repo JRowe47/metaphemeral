@@ -95,3 +95,21 @@ Inference-time policy that varies local optimization iterations (for example con
 
 ## out-of-core recursive reasoning
 A context-management pattern where large inputs remain in an external environment and the model recursively decomposes/solves subproblems through tool-mediated interaction instead of loading all context into one window.
+
+## continuous-depth execution (Neural ODE style)
+An execution pattern where hidden state evolves under learned differential dynamics and a numerical ODE solver determines step count adaptively from error tolerances.
+
+## SATA polynomial state
+A fixed-size attention summary state built from truncated Taylor-kernel polynomial features, replacing context-length-dependent KV cache growth for constant-cost-per-token access.
+
+## innovation number (NEAT)
+A historical marker attached to structural genes so crossover can align homologous connections across genomes with different topologies.
+
+## speciation distance (NEAT)
+A compatibility metric over excess/disjoint genes and average weight differences used to cluster evolving networks and protect emerging innovations.
+
+## goodness projection (Mono-Forward)
+A local layer output produced by projecting activations into class-conditioned goodness scores and training each layer with local cross-entropy.
+
+## Muon update
+A matrix-optimizer step that orthogonalizes momentum-like matrix gradients via Newton–Schulz iteration, then applies shape-aware scaling and weight decay before updating parameters.

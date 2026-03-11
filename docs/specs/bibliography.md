@@ -96,13 +96,13 @@ Relevance: Demonstrates REPL-mediated recursive decomposition over externalized 
 
 ### Neural ODEs
 Link: https://arxiv.org/abs/1806.07366
-Tag: `[background]`
-Relevance: Foundational reference for continuous-depth thinking, useful in reasoning about adaptive step counts.
+Tag: `[paper-backed component]`
+Relevance: Establishes continuous-depth dynamics, adjoint sensitivity training, and tolerance-controlled adaptive compute, supporting solver-governed expert execution and continuous-time latent dynamics.
 
 ### Self-Attention at Constant Cost per Token via Symmetry-Aware Approximation
 Link: https://arxiv.org/abs/2602.00294
-Tag: `[supporting reference]`
-Relevance: Relevant to efficient token processing constraints when deliberation budgets are tight.
+Tag: `[paper-backed component]`
+Relevance: Defines symmetry-aware Taylor-feature attention with fixed-size accumulated state, supporting constant-cost long-history access without context-length KV growth.
 
 ### Gated Attention for Large Language Models
 Link: https://arxiv.org/abs/2505.06708
@@ -118,10 +118,10 @@ Relevance: Serves as a concrete bootstrap method for discovering initial structu
 
 ### Mono-Forward
 Link: https://arxiv.org/abs/2501.09238
-Tag: `[supporting reference]`
-Relevance: Candidate optimization reference for optional bootstrap appendices on efficient update schemes.
+Tag: `[paper-backed component]`
+Relevance: Provides a forward-only local layerwise learning rule via goodness projections, supporting modular helper experts that train from local signals without global backprop.
 
 ### Muon is Scalable for LLM Training
 Link: https://arxiv.org/abs/2502.16982
-Tag: `[supporting reference]`
-Relevance: Useful optional reference for optimizer discussions in offline initialization studies.
+Tag: `[paper-backed component]`
+Relevance: Specifies orthogonalized Newton–Schulz matrix updates with shape-aware scaling and weight decay, supporting scalable optimization of matrix-heavy modules.
