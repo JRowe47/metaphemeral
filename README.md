@@ -47,6 +47,7 @@ See details in:
 - [Research synthesis](docs/specs/research-synthesis.md)
 - [Tick trace spec](docs/specs/tick-trace.md)
 - [Open questions](docs/specs/open-questions.md)
+- [Decision log](docs/specs/decision-log.md)
 - [Glossary](docs/specs/glossary.md)
 - [Annotated bibliography](docs/specs/bibliography.md)
 
@@ -60,6 +61,7 @@ See details in:
 - `docs/specs/research-synthesis.md` — mapping from weight-generation literature to runtime use.
 - `docs/specs/tick-trace.md` — canonical one-tick walkthrough and observability contract baseline.
 - `docs/specs/open-questions.md` — unresolved decisions and validation needs.
+- `docs/specs/decision-log.md` — ADR-style decision records with owners, checkpoints, and fallback paths.
 - `docs/specs/glossary.md` — shared terminology.
 - `docs/specs/bibliography.md` — linked paper map with relevance notes.
 
