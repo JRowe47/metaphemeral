@@ -37,6 +37,26 @@ tick_trace:
     reason: "guardrails_passed"
 ```
 
+## Required per-tick trace metadata (simulator contract)
+- **Project synthesis:** the following metadata is required for replayability in the v0 simulator.
+
+Each tick trace must include:
+1. **Identity and lineage**
+   - `tick_id`, `address_id`, `trace_ids[]`, `parent_trace_ids[]`.
+2. **Pressure and capacity snapshot**
+   - `ready_frames`, `blocked_frames`, `overflow_risk`, `store_fill_ratio`.
+3. **Scheduling decisions**
+   - `reflex_dispatched[]`, `deliberation_dispatched[]`, `deferred_handles[]`.
+4. **Routing and emissions summary**
+   - `urgent_packets`, `normal_packets`, `dropped_packets`, `drop_reasons[]`.
+5. **Durable delta intent**
+   - `changed_paths[]`, `candidate_delta_hash`, `validator_version`.
+6. **Outcome**
+   - `commit.status`, `commit.reason`, `rollback_event_id` (nullable).
+
+Failure mode note:
+- If any required field is missing, the trace is flagged `trace_incomplete=true` and is not eligible as a gold replay artifact.
+
 ## Canonical one-tick walkthrough
 1. **Ingress capture:** two packets arrive and are normalized into activation frames.
 2. **Store update:** frames `h-101`, `h-102`, `h-103` become ready; pressure metrics are sampled.
@@ -68,7 +88,35 @@ Each emitted debug packet should contain:
 - `trace_id`,
 - `dispatch_plane`,
 - `changed_paths` (if any),
-- `commit_status`.
+- `commit_status`,
+- `rollback_event_id` (nullable),
+- `packet_seq` (monotonic per tick).
+
+Validation rule:
+- A replay attempt must fail fast if two debug packets in the same tick share the same `packet_seq`.
+
+## Rollback event schema (required)
+- **Project synthesis:** rollback events are transient runtime records; they are not durable state unless summarized through existing L1 provenance fields.
+
+```yaml
+rollback_event:
+  rollback_event_id: "rb-1042-01"
+  tick_id: 1042
+  address_id: "hex://0/0/0"
+  trace_id: "tr-8b"
+  reason_code: "guardrail_violation" # validation_failed | guardrail_violation | dependency_gap | consistency_break
+  violated_guardrail: "routing_profile.neighbor_bias <= 1.0"
+  dependency_gap:
+    missing_handles: ["h-201"]
+    missing_trace_ids: ["tr-7f"]
+  attempted_changed_paths:
+    - "routing_profile.neighbor_bias"
+  scheduler_action: "retry_reflex_then_defer_deliberation"
+```
+
+Pass/fail behavior for simulator testing:
+- Pass: rollback event contains non-empty `reason_code`, `trace_id`, and either `violated_guardrail` or non-empty `dependency_gap`.
+- Fail: rollback event is emitted without enough detail to reproduce why commit validation failed.
 
 ## Open question and validation path
 - **Open question:** should `pressure_snapshot` be persisted in L1 for forensic replay shortcuts?
