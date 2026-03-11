@@ -218,9 +218,89 @@ Keep:
 
 Do not over-import:
 - **Open question:** what default solver-stop policy best balances latency and quality under mixed reflex/deliberation budgets.
-- **Project synthesis:** scheduler policy that allocates solver steps per head/token remains a runtime-level control decision.
 
-### 14) Recursive out-of-core context interaction (Recursive Language Models)
+
+### 14) Continuous-depth execution with solver-controlled compute (Neural ODEs)
+- **Paper-backed component:** Neural ODEs replace fixed layer stacks with continuous dynamics `dh(t)/dt = f(h(t), t, θ)` and evaluate terminal state with a black-box ODE solver; training can use adjoint sensitivity to avoid storing the full trajectory.
+- **Paper-backed component:** solver tolerances provide an explicit runtime-versus-accuracy knob because the solver adaptively chooses function evaluations per input.
+- **Project synthesis:** in Metaphemeral this supports per-cell/per-expert continuous-depth execution where harder inputs can consume more internal compute while preserving only-L1 persistence.
+
+Keep:
+- Continuous-depth hidden-state evolution instead of fixed depth.
+- Black-box ODE solver as execution primitive.
+- Adjoint sensitivity for reverse-mode gradients without full trajectory caching.
+- Tolerance-based runtime control for reflex-versus-deliberation budgets.
+- Continuous-time latent dynamics for irregularly sampled signals.
+
+Do not over-import:
+- **Open question:** default solver family/tolerance schedule per workload class (online control, sequence reasoning, multimodal fusion).
+- **Project synthesis:** commit semantics and only-L1 persistence are runtime policy choices, not implied by Neural ODEs.
+
+### 15) Constant-cost self-attention via symmetry-aware Taylor approximation (SATA)
+- **Paper-backed component:** SATA approximates `exp(q^T k / c)` with a truncated Taylor expansion and rewrites each degree using symmetric-tensor monomials in a compact minimal polynomial basis.
+- **Paper-backed component:** fixed-size accumulated states (`Z_{p,T}`, `S_{p,T}`) replace context-length-dependent KV cache growth, giving constant per-token cost for fixed head size and Taylor order `P`.
+- **Project synthesis:** in Metaphemeral this is the default long-history summarization primitive for mailbox-like traces when per-token cost must stay bounded.
+
+Keep:
+- Truncated Taylor kernel with explicit order `P`.
+- Symmetric-feature maps `Φ_p` and multiplicity weights `C_p`.
+- Per-degree independent scans that can run in parallel.
+- Fixed accumulated key/value feature state rather than unbounded cache.
+- Explicit accuracy/cost tuning through `P` and head dimensions.
+
+Do not over-import:
+- **Open question:** production kernel strategy and numeric-stability regime for high-order terms under mixed precision.
+- **Project synthesis:** mailbox schemas and routing semantics remain repo-specific runtime design.
+
+### 16) Minimal-start evolutionary bootstrap with speciation (NEAT)
+- **Paper-backed component:** NEAT jointly evolves topology and weights using innovation numbers for crossover alignment, compatibility-distance speciation, and structural mutations (add-connection/add-node).
+- **Paper-backed component:** starting from minimal structure reduces search dimensionality and protects new structural innovations through explicit fitness sharing.
+- **Project synthesis:** in Metaphemeral this is an offline bootstrap path for finding viable seed lineages before enabling live self-updating runtime behavior.
+
+Keep:
+- Linear genome with node/connection genes.
+- Innovation numbers for homologous crossover alignment.
+- Compatibility distance `δ = c1E/N + c2D/N + c3W` for species partitioning.
+- Minimal-start topology with incremental complexity growth.
+- Disabled-gene inheritance and possible later re-enablement.
+
+Do not over-import:
+- **Open question:** which evaluation curriculum and safety gates are sufficient for promoting evolved seeds into deployment.
+- **Project synthesis:** rollout governance, lineage retention, and promotion policy are project decisions beyond NEAT.
+
+### 17) Local forward-only layerwise learning (Mono-Forward)
+- **Paper-backed component:** Mono-Forward trains each layer locally through a projection `M_i` that maps activations `a_i` to class-conditioned goodness scores `G_i = a_i M_i^T`, optimized with local cross-entropy.
+- **Paper-backed component:** each layer updates from local derivatives only, enabling single-forward-pass greedy training without global backprop-through-depth.
+- **Project synthesis:** in Metaphemeral this is a strong candidate for small helper experts/control modules that should be hot-swappable and locally trainable.
+
+Keep:
+- Per-layer projection matrices `M_i` and local goodness vectors.
+- Local cross-entropy loss and local parameter updates for `W_i` and `M_i`.
+- FF-style aggregated prediction and BP-style final-layer prediction options.
+- Layer transparency for per-module diagnostics.
+- Plug/unplug modularity for small expert subsystems.
+
+Do not over-import:
+- **Open question:** how local objectives should be composed with global runtime success metrics for mixed-module systems.
+- **Project synthesis:** selection of which subsystems use local-only learning remains workload/policy specific.
+
+### 18) Matrix-aware orthogonalized optimization at scale (Muon)
+- **Paper-backed component:** Muon forms matrix momentum, orthogonalizes updates via Newton–Schulz iterations, and applies updates with explicit weight decay and shape-aware scaling.
+- **Paper-backed component:** practical large-scale usage requires update-RMS normalization across matrix shapes and distributed state partitioning akin to ZeRO-1 optimizer partitioning.
+- **Project synthesis:** in Metaphemeral this is the preferred optimizer for matrix-heavy modules (weight codecs, routers, expert generators), with AdamW-like methods retained for non-matrix parameters.
+
+Keep:
+- Matrix-momentum plus Newton–Schulz orthogonalization.
+- Shape-aware scaling (for example `sqrt(max(A,B))`) to align update RMS.
+- Explicit weight decay in Muon update path.
+- Distributed gather/orthogonalize/scatter workflow for partitioned training.
+- Hybrid optimizer split: Muon for matrix params, AdamW-like for others.
+
+Do not over-import:
+- **Open question:** default Muon/AdamW parameter partitioning and schedule coupling for heterogeneous module families.
+- **Project synthesis:** final optimizer orchestration policy remains a runtime/training-stack decision.
+
+### 19) Recursive out-of-core context interaction (Recursive Language Models)
 - **Paper-backed component:** Recursive Language Models treat large prompts as external environment state and use a REPL loop where the model writes programs to inspect, transform, and recursively process context slices.
 - **Paper-backed component:** constant-size root history is maintained by feeding back only metadata and tool stdout summaries, while intermediate state lives in the environment.
 - **Project synthesis:** in Metaphemeral this is the default out-of-core reasoning template for long documents/logs/trajectories that exceed local model context capacity.
@@ -396,6 +476,60 @@ Do not over-import:
 
 **Purpose in Metaphemeral:** scalable handling of contexts larger than local windows via recursive environment-coupled computation.
 
+
+### Algorithm O — Continuous-depth expert execution (from Neural ODEs)
+1. Define local dynamics `dh/dt = f(h, t, θ)` for the active expert/cell.
+2. Initialize with current state `h(t0)`.
+3. Integrate to target time `t1` using a black-box ODE solver.
+4. Use solver tolerances to trade latency for solution accuracy.
+5. For training, compute gradients with adjoint sensitivity by solving the augmented system backward.
+6. For density/flow modules, augment state with log-density and integrate trace-based change terms.
+
+**Purpose in Metaphemeral:** adaptive reasoning depth where compute expands only when local dynamics require it.
+
+### Algorithm P — Constant-cost history attention (from SATA)
+1. Approximate the attention kernel with a truncated Taylor expansion up to degree `P-1`.
+2. Build compact per-degree polynomial features `Φ_p(q)` and `Φ_p(k)` via symmetric-index maps.
+3. Update fixed-size accumulated states for key features and key-value feature products.
+4. Compute each degree contribution at query time from the accumulated states.
+5. Sum all degree contributions to produce attention output.
+6. Parallelize per-degree scans where hardware permits.
+7. Tune `P` and head dimensions for target error/cost.
+
+**Purpose in Metaphemeral:** long-history querying without linear per-token cost growth.
+
+### Algorithm Q — Evolutionary bootstrap from minimal viable seeds (from NEAT)
+1. Initialize a population of minimal-topology genomes.
+2. Evaluate fitness on bootstrap tasks.
+3. Partition genomes into species via compatibility distance.
+4. Reproduce using innovation-aligned crossover.
+5. Mutate weights and occasionally add connections or split connections into new nodes.
+6. Preserve structural innovations within species long enough to optimize.
+7. Iterate until stable viable seed lineages are found.
+
+**Purpose in Metaphemeral:** offline discovery of deployable initial L1 seed structures.
+
+### Algorithm R — Local expert adaptation without global backprop (from Mono-Forward)
+1. Forward input through layer `i` to obtain activations `a_i`.
+2. Compute local goodness scores `G_i = a_i M_i^T`.
+3. Apply local cross-entropy against the label/task target.
+4. Update `W_i` and `M_i` using only local derivatives.
+5. Pass `a_i` to the next layer and repeat.
+6. At inference, either aggregate goodness across layers or use final-layer goodness directly.
+
+**Purpose in Metaphemeral:** plug-compatible helper modules that learn from local signals only.
+
+### Algorithm S — Matrix-aware large-scale optimization (from Muon)
+1. Form momentum `M_t` from matrix gradients.
+2. Apply Newton–Schulz iterations to obtain approximately orthogonalized update `O_t`.
+3. Scale `O_t` with shape-aware normalization to align update RMS across matrix sizes.
+4. Add weight decay term.
+5. Apply parameter update.
+6. In distributed mode, gather full matrices only for orthogonalization, then scatter partitions.
+7. Keep non-matrix parameters on AdamW-like optimizer path.
+
+**Purpose in Metaphemeral:** stable, scalable optimization for matrix-dominated modules.
+
 ## Recommended synthesis for current project stage
 - **Project synthesis:** use D2NWG-style machinery for context-conditioned spawning.
 - **Project synthesis:** use DeepWeightFlow-style machinery for fast full-weight generation when direct flow is cheaper.
@@ -411,6 +545,11 @@ Do not over-import:
 - **Project synthesis:** use TTT-style hidden-state learning when persisted L1 state should adapt online through self-supervised updates.
 - **Project synthesis:** use Mesa-style local optimization with dynamic solver stops for variable-depth reasoning inside active experts.
 - **Project synthesis:** use RLM-style recursive environment interaction for out-of-core contexts that exceed local windows.
+- **Project synthesis:** use Neural ODE-style continuous-depth execution where solver-controlled adaptive compute is needed.
+- **Project synthesis:** use SATA-style polynomial state summarization where long histories must remain constant-cost per token.
+- **Project synthesis:** use NEAT-style minimal-start topology evolution as an offline bootstrap stage for viable initial seeds.
+- **Project synthesis:** use Mono-Forward-style local goodness training for small modular helper experts and control nets.
+- **Project synthesis:** use Muon-style orthogonalized updates for matrix-heavy parameter groups while keeping AdamW-like updates for non-matrix parameters.
 
 ## Project synthesis vs paper-backed components
 
@@ -433,6 +572,11 @@ Do not over-import:
 - TTT-style hidden state as an inference-time trainable learner.
 - MesaNet-style locally optimal solver-based sequence update with dynamic CG depth.
 - Recursive Language Model style REPL-mediated out-of-core recursion over environment context.
+- Neural ODE continuous-depth dynamics with adjoint training and tolerance-controlled compute.
+- SATA symmetry-aware Taylor attention with fixed-size accumulated state.
+- NEAT innovation-number crossover and compatibility-distance speciation.
+- Mono-Forward local goodness projections for layerwise updates.
+- Muon Newton–Schulz orthogonalized matrix updates with shape-aware scaling.
 
 ### Project synthesis
 - Only-L1-persists runtime model.
@@ -466,6 +610,11 @@ Do not over-import:
 - TTT layers give a practical pattern for hidden states that learn online during inference.
 - MesaNet gives a practical pattern for local optimal solves with adaptive per-token compute.
 - Recursive Language Models give a practical pattern for recursive out-of-core context handling through environment tools.
+- Neural ODEs give a practical pattern for adaptive continuous-depth execution with explicit solver-budget controls.
+- SATA gives a practical pattern for constant-cost long-history attention through polynomial-state accumulation.
+- NEAT gives a practical pattern for minimal-start structural evolution with protected innovation.
+- Mono-Forward gives a practical pattern for local-only layerwise learning in modular subsystems.
+- Muon gives a practical pattern for scalable matrix-aware optimization in MoE-like and matrix-heavy training regimes.
 
 For this repo stage:
 - **Project synthesis:** L1 persistence should be trajectory-informed.
@@ -481,3 +630,8 @@ For this repo stage:
 - **Project synthesis:** cells should use TTT-style adaptation when persisted L1 must improve from ongoing local experience.
 - **Project synthesis:** experts should use Mesa-style solver loops when variable reasoning depth is worth extra FLOPs.
 - **Project synthesis:** out-of-core problems should use RLM-style recursive environment interaction instead of forcing full context into root windows.
+- **Project synthesis:** continuous-depth experts should expose solver tolerances and halting policies as explicit runtime compute knobs.
+- **Project synthesis:** long-history summaries should prefer SATA-style fixed-state scans before unbounded cache growth.
+- **Project synthesis:** bootstrap should use minimal-start evolution and speciation to protect early structural innovations.
+- **Project synthesis:** modular helper subsystems may use Mono-Forward local learning where transparency and hot-swappability dominate.
+- **Project synthesis:** matrix-heavy components should default to Muon-style updates, with conventional optimizers reserved for non-matrix groups.
