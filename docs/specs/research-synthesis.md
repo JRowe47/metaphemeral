@@ -171,6 +171,71 @@ Do not over-import:
 - **Open question:** what minimum evaluation suite is sufficient to certify a lineage as runtime-safe.
 - **Project synthesis:** selection policy details and rollout gates into production runtime are project governance decisions.
 
+
+### 11) Latent read/process/write workspaces for arbitrary I/O (Perceiver IO)
+- **Paper-backed component:** Perceiver IO maps arbitrary input arrays into a fixed latent array, runs deep latent-only computation, and decodes arbitrary outputs through query-driven cross-attention.
+- **Paper-backed component:** output queries encode output semantics (for example position, modality, task, or entity), allowing one shared latent workspace to support heterogeneous output formats.
+- **Project synthesis:** in Metaphemeral this becomes the default ingress/egress workspace pattern for environment ports and multimodal cell boundaries where raw interface size can be very large.
+
+Keep:
+- Fixed latent workspace `z ∈ R^(N×D)` decoupled from raw input/output size.
+- Input cross-attention from arbitrary input arrays into latents.
+- Deep latent processing as the main compute path.
+- Query-driven output decoding from latents into structured outputs.
+- Output-query subsampling during training and batched full decoding at test time for very large output spaces.
+
+Do not over-import:
+- **Open question:** which default latent size and depth should be standardized per workload class (ports, sensorimotor loops, document tools).
+- **Project synthesis:** the only-L1-persists rule still applies; latent workspace activity is ephemeral unless explicitly committed into L1 state.
+
+### 12) Test-time training hidden state as an online learner (TTT layers)
+- **Paper-backed component:** TTT reframes sequence hidden state as model parameters `W_t` updated during inference by self-supervised learning steps, rather than as a fixed recurrent vector.
+- **Paper-backed component:** learned training/label/test views (`θ_K, θ_V, θ_Q`), mini-batch updates, dual-form acceleration, and learnable initialization/learning-rate gates provide practical mechanisms for expressive online adaptation.
+- **Project synthesis:** in Metaphemeral this is the reference pattern for L1 cell state that should adapt through use, while preserving only-L1 persistence at commit boundaries.
+
+Keep:
+- Hidden state represented as learner weights `W_t`.
+- Inference-time inner-loop gradient updates on local self-supervised objectives.
+- Learnable view projections for training/label/test roles.
+- Mini-batch and dual-form implementations for hardware-efficient updates.
+- Learnable initialization and token-conditional learning-rate gates.
+
+Do not over-import:
+- **Open question:** how aggressively to allow online adaptation before stability controls must damp updates in live asynchronous settings.
+- **Project synthesis:** retention, commit cadence, and rollback policy for adapted L1 state remain runtime governance decisions.
+
+### 13) Locally optimal solver-based sequence updates (MesaNet)
+- **Paper-backed component:** MesaNet defines sequence updates by solving a regularized local least-squares objective over context, with recurrent sufficient statistics and solver-based readout instead of one-step fast-weight heuristics.
+- **Paper-backed component:** dynamic conjugate-gradient (CG) solve depth, chunkwise parallelization, and gating-based forgetting/write strengths provide adaptive inference-time compute with stable recurrent execution.
+- **Project synthesis:** in Metaphemeral this is the primary paper-backed template for variable-depth reasoning inside experts where harder tokens/subproblems should consume more solver steps.
+
+Keep:
+- Recurrent sufficient statistics (`G_t`, `H_t`) for local optimization state.
+- Approximate linear-system solves via CG for readout.
+- Dynamic stopping criteria based on residual thresholds.
+- Context-dependent forgetting/write gates (`γ_t`, `β_t`).
+- Stability heuristics: key/query normalization, bounded regularization, and repeated-token safeguards.
+
+Do not over-import:
+- **Open question:** what default solver-stop policy best balances latency and quality under mixed reflex/deliberation budgets.
+- **Project synthesis:** scheduler policy that allocates solver steps per head/token remains a runtime-level control decision.
+
+### 14) Recursive out-of-core context interaction (Recursive Language Models)
+- **Paper-backed component:** Recursive Language Models treat large prompts as external environment state and use a REPL loop where the model writes programs to inspect, transform, and recursively process context slices.
+- **Paper-backed component:** constant-size root history is maintained by feeding back only metadata and tool stdout summaries, while intermediate state lives in the environment.
+- **Project synthesis:** in Metaphemeral this is the default out-of-core reasoning template for long documents/logs/trajectories that exceed local model context capacity.
+
+Keep:
+- Context offloading into environment variables or external stores.
+- REPL-mediated symbolic operations over external context.
+- Recursive self-calls on programmatically generated subproblems.
+- Constant-size root context with environment-resident intermediates.
+- Programmatic decomposition as first-class behavior, not only retrieval or lossy summarization.
+
+Do not over-import:
+- **Open question:** which guardrails should gate recursive depth, tool permissions, and failure recovery in live deployments.
+- **Project synthesis:** environment APIs and safety sandbox design are repo runtime concerns, not fixed by RLM alone.
+
 ## Condensed algorithm set for Metaphemeral
 
 ### Algorithm A — Conditional expert spawning (from D2NWG)
@@ -286,6 +351,51 @@ Do not over-import:
 
 **Purpose in Metaphemeral:** default pre-live bootstrap primitive for viable self-updating seeds.
 
+
+### Algorithm K — Latent workspace ingress/egress (from Perceiver IO)
+1. Represent input as an arbitrary array of feature vectors.
+2. Cross-attend from a fixed latent array to the input array to obtain latent state.
+3. Process the latent array with repeated latent attention/MLP blocks.
+4. Construct output query vectors that encode output semantics (position, modality, task, entity).
+5. Cross-attend from output queries to processed latents.
+6. Project resulting output array into the external target form.
+7. For huge output spaces, subsample queries during training and decode in batches at test time.
+
+**Purpose in Metaphemeral:** bounded shared workspace for high-volume multimodal ingress/egress without scaling core compute with interface size.
+
+### Algorithm L — Persistent adaptive cell state (from TTT layers)
+1. Treat hidden state as learner parameters `W_t` for local model `f`.
+2. Build learned training/label/test views for current token or chunk.
+3. Compute self-supervised loss on the current token/chunk.
+4. Update `W_t` using one gradient step (or mini-batch update).
+5. Produce current output/state from updated learner.
+6. Carry updated learner parameters as next hidden state.
+7. Use dual-form implementation where available for matrix-efficient inner-loop compute.
+
+**Purpose in Metaphemeral:** L1 state that improves online from local experience instead of acting as a passive recurrent vector.
+
+### Algorithm M — Adaptive solver-based reasoning (from MesaNet)
+1. Compute keys, queries, values, and gating strengths from current input/state.
+2. Update recurrent sufficient statistics `G_t` and `H_t`.
+3. Solve `(H_t + Λ) q*_t = q_t` approximately with conjugate gradient.
+4. Compute output `o_t = G_t q*_t`.
+5. Stop solver early when residual falls below threshold.
+6. Use chunkwise parallelization for training/inference throughput.
+7. Allow solver iterations to vary per head, sequence, and token.
+
+**Purpose in Metaphemeral:** adaptive reasoning depth where experts spend additional test-time compute only when local difficulty warrants it.
+
+### Algorithm N — Out-of-core recursive context handling (from Recursive Language Models)
+1. Place full external context into an environment variable/store.
+2. Give root model compact metadata plus REPL/tool interface.
+3. Let model write code to inspect, chunk, filter, and transform context.
+4. Allow recursive model calls on derived subproblems/chunks.
+5. Store intermediates in environment rather than root context window.
+6. Continue loop until final output variable is set.
+7. Return final variable as answer.
+
+**Purpose in Metaphemeral:** scalable handling of contexts larger than local windows via recursive environment-coupled computation.
+
 ## Recommended synthesis for current project stage
 - **Project synthesis:** use D2NWG-style machinery for context-conditioned spawning.
 - **Project synthesis:** use DeepWeightFlow-style machinery for fast full-weight generation when direct flow is cheaper.
@@ -297,6 +407,10 @@ Do not over-import:
 - **Project synthesis:** use DirMoE-style routing for calibrated, differentiable sparse selection with explicit expected-k control.
 - **Project synthesis:** use Neuro-Vesicles-style event entities for asynchronous local modulation above the base network graph.
 - **Project synthesis:** use Self-Referential GHN-style internalized evolution for offline bootstrap of viable L1 lineages.
+- **Project synthesis:** use Perceiver IO as the default latent ingress/egress workspace at environment and multimodal boundaries.
+- **Project synthesis:** use TTT-style hidden-state learning when persisted L1 state should adapt online through self-supervised updates.
+- **Project synthesis:** use Mesa-style local optimization with dynamic solver stops for variable-depth reasoning inside active experts.
+- **Project synthesis:** use RLM-style recursive environment interaction for out-of-core contexts that exceed local windows.
 
 ## Project synthesis vs paper-backed components
 
@@ -315,6 +429,10 @@ Do not over-import:
 - Differentiable selection/contribution routing with expected-k sparsity controls (DirMoE).
 - Event-entity modulation dynamics over graph topology (Neuro-Vesicles).
 - Self-referential stochastic hypernetwork updates for evolutionary bootstrap (Hypernetworks That Evolve Themselves).
+- Perceiver IO latent read/process/write workspace with query-driven output decoding.
+- TTT-style hidden state as an inference-time trainable learner.
+- MesaNet-style locally optimal solver-based sequence update with dynamic CG depth.
+- Recursive Language Model style REPL-mediated out-of-core recursion over environment context.
 
 ### Project synthesis
 - Only-L1-persists runtime model.
@@ -328,6 +446,10 @@ Do not over-import:
 - Mapping sparse-routing controls onto reflex versus deliberation budget policy.
 - Runtime packet schemas and safety constraints for event-driven modulation entities.
 - Certification thresholds for promoting bootstrap lineages into live deployment.
+- Mapping ingress/egress interfaces to shared latent workspace schemas across ports.
+- Policy limits for online L1 adaptation rates and commit frequency.
+- Runtime residual thresholds and iteration caps for solver-based reasoning loops.
+- Tool permissions, recursion-depth caps, and watchdog behavior for out-of-core recursive loops.
 
 ## Contributor interpretation
 - D2NWG gives a practical pattern for generating weights from context.
@@ -340,6 +462,10 @@ Do not over-import:
 - DirMoE gives a practical pattern for differentiable, interpretable sparse routing with explicit control knobs.
 - Neuro-Vesicles gives a practical pattern for asynchronous local modulation via event entities.
 - Self-Referential GHNs give a practical pattern for internalized variation during bootstrap evolution.
+- Perceiver IO gives a practical pattern for bounded latent workspaces that can read/write arbitrary arrays.
+- TTT layers give a practical pattern for hidden states that learn online during inference.
+- MesaNet gives a practical pattern for local optimal solves with adaptive per-token compute.
+- Recursive Language Models give a practical pattern for recursive out-of-core context handling through environment tools.
 
 For this repo stage:
 - **Project synthesis:** L1 persistence should be trajectory-informed.
@@ -351,3 +477,7 @@ For this repo stage:
 - **Project synthesis:** sparse society phases should pair PEER retrieval with DirMoE probabilistic routing where gradients must flow through selection.
 - **Project synthesis:** asynchronous control should use event entities with bounded lifetime rather than persistent global modifiers.
 - **Project synthesis:** bootstrap phases should prioritize self-referential variation loops before enabling live runtime mutation.
+- **Project synthesis:** system edges should default to Perceiver IO latent workspaces for large or multimodal ingress/egress.
+- **Project synthesis:** cells should use TTT-style adaptation when persisted L1 must improve from ongoing local experience.
+- **Project synthesis:** experts should use Mesa-style solver loops when variable reasoning depth is worth extra FLOPs.
+- **Project synthesis:** out-of-core problems should use RLM-style recursive environment interaction instead of forcing full context into root windows.
