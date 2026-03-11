@@ -46,7 +46,7 @@ Relevance: Provides dual-threshold draft-and-edit decoding, mixed M2T/T2T traini
 ### Mixture of A Million Experts (PEER)
 Link: https://arxiv.org/abs/2407.04153
 Tag: `[paper-backed component]`
-Relevance: Demonstrates scaling behavior of many tiny experts, directly relevant to sparse expert assumptions in this repo.
+Relevance: Demonstrates product-key retrieval with singleton experts and multi-head sparse composition, supporting the repo default for massive tiny-expert lookup with bounded active compute.
 
 ### Sigma-MoE-Tiny Technical Report
 Link: https://arxiv.org/abs/2512.16248
@@ -56,19 +56,19 @@ Relevance: Offers practical observations about tiny MoE regimes that inform expe
 ### DirMoE: Dirichlet-routed Mixture of Experts
 Link: https://arxiv.org/abs/2602.09001
 Tag: `[paper-backed component]`
-Relevance: Informs probabilistic routing approaches and uncertainty-aware expert selection strategies.
+Relevance: Provides a differentiable routing recipe that disentangles expert selection and contribution via Gumbel-Sigmoid + Dirichlet with explicit expected-k sparsity control.
 
 ## Async modulation / self-referential systems
 
 ### Neuro-Vesicles: Neuromodulation Should Be a Dynamical System, Not a Tensor Decoration
 Link: https://arxiv.org/abs/2512.06966
-Tag: `[supporting reference]`
-Relevance: Motivates treating modulation as dynamical state, which conceptually supports asynchronous control signals in runtime design.
+Tag: `[paper-backed component]`
+Relevance: Specifies entity-based modulation dynamics (emit/migrate/dock/release/decay) and differentiable density relaxations, supporting the repo async modulation overlay.
 
 ### Hypernetworks That Evolve Themselves
 Link: https://arxiv.org/abs/2512.16406
-Tag: `[supporting reference]`
-Relevance: Provides ideas on self-referential parameter generation that are relevant to generated behavior pathways from persistent anchors.
+Tag: `[paper-backed component]`
+Relevance: Defines self-referential stochastic hypernetwork updates with heritable mutation controls, supporting bootstrap-phase generation of viable self-updating L1 seeds.
 
 ## Workspace / online adaptation / long context
 
