@@ -64,3 +64,18 @@ In editable block diffusion, masked token positions whose top prediction confide
 
 ## editing set (Δ_t)
 In editable block diffusion, already-filled positions where a different token prediction exceeds the edit threshold and is therefore replaced this step.
+
+## product-key routing
+Sparse retrieval method that splits a query into subqueries, retrieves top matches from sub-key tables, and reconstructs candidate keys efficiently before final top-k selection.
+
+## tiny expert
+A minimal specialist module (for example singleton MLP form `e_i(x) = σ(u_i^T x)v_i`) designed for massive sparse composition rather than standalone depth.
+
+## expected-k sparsity control
+Routing constraint that penalizes deviation between expected active experts and a target `k`, exposing an explicit compute/sparsity knob.
+
+## event-driven modulation
+A control pattern where transient entities are emitted, migrate, dock, release local effects, and decay, instead of applying global persistent modulation.
+
+## self-referential bootstrap
+Offline initialization loop where a model (or hypernetwork) generates stochastic updates to copies of itself, evaluates descendants, and selects viable lineages.

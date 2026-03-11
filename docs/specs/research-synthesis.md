@@ -110,6 +110,67 @@ Do not over-import:
 - **Open question:** whether block-level editing introduces unacceptable instability for safety-critical outputs without additional verifier loops.
 - **Project synthesis:** choosing when to stop editing versus commit is controlled by runtime policy and budget, not by the paper alone.
 
+### 7) Extreme sparse retrieval over tiny experts (PEER)
+- **Paper-backed component:** PEER introduces product-key retrieval over a massive pool of singleton MLP experts, where two-stage sub-key lookup reduces routing from naive `O(Nd)` to `O((√N + k²)d)` while preserving top-k quality.
+- **Paper-backed component:** PEER uses tiny experts of the form `e_i(x) = σ(u_i^T x)v_i` and multi-head retrieval so each token composes many cheap specialists while active compute remains bounded.
+- **Project synthesis:** in Metaphemeral this is the default high-cardinality addressing primitive for capability groups and lattice-wide specialist pools.
+
+Keep:
+- Product-key retrieval with sub-query decomposition.
+- Tiny singleton experts as the minimum modular unit.
+- Multi-head retrieval to assemble dynamic MLP behavior.
+- Query normalization (or equivalent balancing control) to avoid expert collapse.
+- Active-expert count as an explicit granularity/compute knob.
+
+Do not over-import:
+- **Open question:** whether singleton experts should be the only expert type or coexist with larger experts for specific runtime lanes.
+- **Project synthesis:** fixed-address lattice semantics and packet routing policies are repo design choices layered on top of PEER retrieval.
+
+### 8) Differentiable sparse probabilistic routing (DirMoE)
+- **Paper-backed component:** DirMoE separates routing into differentiable expert selection and contribution, using relaxed Bernoulli (Gumbel-Sigmoid) gates for activation and a Dirichlet posterior for mixture weights.
+- **Paper-backed component:** final routing is the normalized Hadamard product `normalize(z̃ ⊙ θ)` and is trained with task loss plus Dirichlet regularization and expected-k sparsity control.
+- **Project synthesis:** in Metaphemeral this is the default live sparse orchestration mechanism when routing must remain end-to-end differentiable and interpretable.
+
+Keep:
+- Temperature-annealed Gumbel-Sigmoid selection gates.
+- Dirichlet concentration schedules that move from exploratory to decisive routing.
+- Explicit expected-k sparsity penalty to control reasoning budget.
+- Concentration diagnostics for routing decisiveness.
+
+Do not over-import:
+- **Open question:** how to map expected-k controls to heterogeneous workload classes (reflex versus deliberation traffic) without destabilizing quality.
+- **Project synthesis:** cluster boundaries and scheduler coupling are Metaphemeral runtime decisions, not prescribed by DirMoE.
+
+### 9) Event-driven modulation as a dynamical overlay (Neuro-Vesicles)
+- **Paper-backed component:** Neuro-Vesicles models modulation as explicit entities moving over a graph `G=(V,E)` with emission, migration, docking, release, and decay dynamics.
+- **Paper-backed component:** release operators can act on activations, parameters, learning rules, or external memory, with differentiable density relaxations and RL control variants.
+- **Project synthesis:** in Metaphemeral this becomes the async event layer for transient packets that locally alter behavior without violating only-L1 persistence.
+
+Keep:
+- Graph-native modulation dynamics instead of tensor-only control channels.
+- Event lifecycle primitives: emit, migrate, dock, release, decay.
+- Local intervention semantics rather than global overrides.
+- Optional density approximation for differentiable training.
+
+Do not over-import:
+- **Open question:** which release operator classes should be enabled by default under safety constraints.
+- **Project synthesis:** mailbox layout, packet schemas, and lattice hop policies remain runtime-specific design choices.
+
+### 10) Self-referential stochastic bootstrap (Hypernetworks That Evolve Themselves)
+- **Paper-backed component:** Self-Referential GHNs internalize variation generation by using a stochastic hypernetwork to produce self-updates and a deterministic branch to generate evaluation networks.
+- **Paper-backed component:** node-specific mutation-rate heads and fixed random output bases provide practical mechanisms for stable self-referential evolution.
+- **Project synthesis:** in Metaphemeral this is the default bootstrap strategy for discovering viable self-updating L1 seeds before live runtime rollout.
+
+Keep:
+- Graph-hypernetwork structure encoding with node embeddings + GNN processing.
+- Stochastic self-update branch for offspring variation.
+- Deterministic evaluation-network generation for fitness measurement.
+- Heritable node-specific mutation-rate controls.
+
+Do not over-import:
+- **Open question:** what minimum evaluation suite is sufficient to certify a lineage as runtime-safe.
+- **Project synthesis:** selection policy details and rollout gates into production runtime are project governance decisions.
+
 ## Condensed algorithm set for Metaphemeral
 
 ### Algorithm A — Conditional expert spawning (from D2NWG)
@@ -179,6 +240,52 @@ Do not over-import:
 
 **Purpose in Metaphemeral:** fast draft-and-repair execution where outputs can improve while parallel computation continues.
 
+
+### Algorithm G — Massive sparse expert retrieval (from PEER)
+1. Compute query vector `q(x)` from current token/state.
+2. Split `q` into two subqueries and score against two learned sub-key tables.
+3. Take top-k matches in each sub-key table.
+4. Form Cartesian-product candidate keys and rerank candidates.
+5. Retrieve corresponding tiny experts.
+6. Compute router scores from query-key similarities.
+7. Evaluate retrieved experts and aggregate weighted outputs.
+
+**Purpose in Metaphemeral:** default high-cardinality expert retrieval primitive for large specialist pools.
+
+### Algorithm H — Differentiable sparse routing (from DirMoE)
+1. Compute router logits from token/state embedding.
+2. Sample relaxed expert-selection gates with Gumbel-Sigmoid.
+3. Build posterior Dirichlet parameters from gate values.
+4. Sample expert-contribution weights with implicit reparameterization.
+5. Form final routing weights by normalizing `z̃ ⊙ θ`.
+6. Aggregate expert outputs.
+7. Optimize task loss + Dirichlet regularization + expected-k sparsity loss.
+8. Anneal gate temperature and concentration schedules from exploratory to decisive routing.
+
+**Purpose in Metaphemeral:** default differentiable live-routing primitive with explicit sparsity controls.
+
+### Algorithm I — Event-driven modulation overlay (from Neuro-Vesicles)
+1. Represent runtime topology as graph `G=(V,E)`.
+2. Emit modulatory entities from local activity/gradient/meta signals.
+3. Move entities through `G` via learned transition kernels.
+4. Sample docking decisions at candidate destinations.
+5. On docking, apply local release operators (activation/parameter/rule/memory).
+6. Age and decay entities so modulatory traces remain bounded.
+7. Optionally train a density relaxation or RL controller over vesicle dynamics.
+
+**Purpose in Metaphemeral:** default asynchronous signaling and local modulation primitive.
+
+### Algorithm J — Self-referential bootstrap (from Self-Referential GHNs)
+1. Encode the self-updating system as a graph hypernetwork.
+2. Copy a parent instance.
+3. Generate stochastic self-updates for the copy.
+4. Apply updates to create offspring.
+5. Generate deterministic evaluation networks for external tasks.
+6. Evaluate offspring fitness and stability.
+7. Select and repeat across generations, preserving heritable mutation-rate traits.
+
+**Purpose in Metaphemeral:** default pre-live bootstrap primitive for viable self-updating seeds.
+
 ## Recommended synthesis for current project stage
 - **Project synthesis:** use D2NWG-style machinery for context-conditioned spawning.
 - **Project synthesis:** use DeepWeightFlow-style machinery for fast full-weight generation when direct flow is cheaper.
@@ -186,6 +293,10 @@ Do not over-import:
 - **Project synthesis:** use UL as the canonical latent codec for heavy internal artifacts that must be reconstructible and generatively modelable.
 - **Project synthesis:** use FLM/FMLM as the preferred few-step text executor when replayability and low-latency parallel generation are priorities.
 - **Project synthesis:** use LLaDA2.1 as the default editable block executor when throughput and asynchronous self-correction are priorities.
+- **Project synthesis:** use PEER-style product-key retrieval for massive tiny-expert pools and high-cardinality capability addressing.
+- **Project synthesis:** use DirMoE-style routing for calibrated, differentiable sparse selection with explicit expected-k control.
+- **Project synthesis:** use Neuro-Vesicles-style event entities for asynchronous local modulation above the base network graph.
+- **Project synthesis:** use Self-Referential GHN-style internalized evolution for offline bootstrap of viable L1 lineages.
 
 ## Project synthesis vs paper-backed components
 
@@ -200,6 +311,10 @@ Do not over-import:
 - Deterministic-latent diffusion codec training with bitrate controls (UL).
 - Continuous one-hot flow denoising and flow-map distillation for few-step generation (FLM/FMLM).
 - Dual-threshold block draft-and-edit diffusion execution (LLaDA2.1).
+- Product-key routing over massive tiny-expert pools (PEER).
+- Differentiable selection/contribution routing with expected-k sparsity controls (DirMoE).
+- Event-entity modulation dynamics over graph topology (Neuro-Vesicles).
+- Self-referential stochastic hypernetwork updates for evolutionary bootstrap (Hypernetworks That Evolve Themselves).
 
 ### Project synthesis
 - Only-L1-persists runtime model.
@@ -210,6 +325,9 @@ Do not over-import:
 - Implicit links induced by packet traffic.
 - Runtime policy for choosing codec and executor per workload class.
 - Runtime thresholds that switch between speed and quality modes for editable executors.
+- Mapping sparse-routing controls onto reflex versus deliberation budget policy.
+- Runtime packet schemas and safety constraints for event-driven modulation entities.
+- Certification thresholds for promoting bootstrap lineages into live deployment.
 
 ## Contributor interpretation
 - D2NWG gives a practical pattern for generating weights from context.
@@ -218,6 +336,10 @@ Do not over-import:
 - UL gives a practical pattern for stable bitrate-controlled latent codecs.
 - FLM/FMLM gives a practical pattern for one-step/few-step replayable text execution.
 - LLaDA2.1 gives a practical pattern for draft-fast, edit-later text execution.
+- PEER gives a practical pattern for efficient lookup across huge pools of tiny experts.
+- DirMoE gives a practical pattern for differentiable, interpretable sparse routing with explicit control knobs.
+- Neuro-Vesicles gives a practical pattern for asynchronous local modulation via event entities.
+- Self-Referential GHNs give a practical pattern for internalized variation during bootstrap evolution.
 
 For this repo stage:
 - **Project synthesis:** L1 persistence should be trajectory-informed.
@@ -226,3 +348,6 @@ For this repo stage:
 - **Project synthesis:** symmetry handling and post-generation calibration are part of generation pipelines, not optional cleanup.
 - **Project synthesis:** internal codecs should default to UL-style deterministic latent pipelines with explicit bitrate knobs.
 - **Project synthesis:** text executors should select FLM/FMLM or LLaDA2.1 based on replayability versus editable-throughput needs.
+- **Project synthesis:** sparse society phases should pair PEER retrieval with DirMoE probabilistic routing where gradients must flow through selection.
+- **Project synthesis:** asynchronous control should use event entities with bounded lifetime rather than persistent global modifiers.
+- **Project synthesis:** bootstrap phases should prioritize self-referential variation loops before enabling live runtime mutation.
