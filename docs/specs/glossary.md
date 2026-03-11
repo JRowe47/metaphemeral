@@ -113,3 +113,9 @@ A local layer output produced by projecting activations into class-conditioned g
 
 ## Muon update
 A matrix-optimizer step that orthogonalizes momentum-like matrix gradients via Newton–Schulz iteration, then applies shape-aware scaling and weight decay before updating parameters.
+
+## L1 record
+The full persisted per-address state envelope validated and written at commit boundaries (schema version, routing profile, safety state, provenance, and lifecycle metadata).
+
+## changed paths
+A compact list of field paths in L1 that were modified by a candidate delta in a tick, used for replay/debug and commit auditing.

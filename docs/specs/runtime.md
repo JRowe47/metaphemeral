@@ -1,6 +1,6 @@
 # Runtime Specification
 
-Related specs: [architecture](architecture.md), [activation store](activation-store.md), [training bootstrap](training-bootstrap.md), [open questions](open-questions.md), [glossary](glossary.md), [bibliography](bibliography.md).
+Related specs: [architecture](architecture.md), [activation store](activation-store.md), [l1 schema](l1-schema.md), [tick trace](tick-trace.md), [training bootstrap](training-bootstrap.md), [open questions](open-questions.md), [glossary](glossary.md), [bibliography](bibliography.md).
 
 ## Compute model
 Runtime execution is event-driven over a fixed-address lattice. Each tick consumes ingress packets and local activation pressure, schedules sparse expert execution, emits new packets, and commits L1 updates.
@@ -85,6 +85,8 @@ Rollback guarantees:
 - retry policy is delegated to scheduler.
 
 **Open question:** whether rollback should include selective partial-accept mode.
+
+See [tick-trace.md](tick-trace.md) for a canonical record shape and one-tick worked example.
 
 ## Full compute-cycle walkthrough (plain English)
 A tick starts when packets arrive from external ports and neighboring cells. The runtime records these packets as activation frames and measures local pressure. The reflex plane runs first to handle urgent work quickly and enforce safety constraints. If budget remains, the deliberation plane generates and executes deeper L2/L3 routines. Both planes can emit packets, request capability-based routing, or update transient deltas.

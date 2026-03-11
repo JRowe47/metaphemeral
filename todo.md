@@ -30,15 +30,15 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 ## P0 — Immediate (unblock simulator specification)
 
 ### A. Freeze provisional L1 state representation
-- [ ] Draft `docs/specs/l1-schema.md` with a concrete minimal schema:
-  - [ ] identity/versioning fields,
-  - [ ] adapter/latent seed container,
-  - [ ] routing priors and capability descriptors,
-  - [ ] safety and cooldown metadata,
-  - [ ] lineage/provenance fields for reproducibility.
-- [ ] Define commit/rollback field-level semantics for L1 updates.
-- [ ] Specify backward-compatible version migration policy for long-lived addresses.
-- [ ] Record unresolved parts as Open questions with explicit validation plan.
+- [x] Draft `docs/specs/l1-schema.md` with a concrete minimal schema:
+  - [x] identity/versioning fields,
+  - [x] adapter/latent seed container,
+  - [x] routing priors and capability descriptors,
+  - [x] safety and cooldown metadata,
+  - [x] lineage/provenance fields for reproducibility.
+- [x] Define commit/rollback field-level semantics for L1 updates.
+- [x] Specify backward-compatible version migration policy for long-lived addresses.
+- [x] Record unresolved parts as Open questions with explicit validation plan.
 
 ### B. Specify activation-store capacity and overflow behavior
 - [ ] Convert overflow policy into a deterministic rule set with tie-break order.
@@ -58,7 +58,7 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [ ] Define required trace metadata per tick (ids, pressure snapshots, schedule decisions, outcome).
 - [ ] Define “minimum debug packet” content for reproducible replay.
 - [ ] Define rollback event schema (reason, violated guardrail, dependency gap details).
-- [ ] Add a canonical one-tick trace example spanning mailbox → store → scheduler → commit.
+- [x] Add a canonical one-tick trace example spanning mailbox → store → scheduler → commit.
 
 ### E. Decide first-pass executor evaluation protocol
 - [ ] Define shared benchmark tasks for flow-based and block-diffusion executors.
@@ -143,9 +143,9 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 ## 5) Suggested execution order (first 3 work packages)
 
 ### Work package 1: L1 schema + tick trace backbone
-- [ ] Produce provisional L1 schema doc.
-- [ ] Add tick trace example that consumes/updates schema fields.
-- [ ] Verify compatibility with rollback and commit rules.
+- [x] Produce provisional L1 schema doc.
+- [x] Add tick trace example that consumes/updates schema fields.
+- [x] Verify compatibility with rollback and commit rules.
 
 ### Work package 2: Activation overflow + routing load semantics
 - [ ] Finalize overflow rule precedence and capacity recommendations.
