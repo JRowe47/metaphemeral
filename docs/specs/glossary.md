@@ -49,3 +49,18 @@ Preprocessing of weight sets to reduce permutation-symmetry mismatch before fitt
 
 ## trajectory prior
 A training prior derived from optimization paths (not only final checkpoints), used to constrain or guide generated weight evolution.
+
+## unified latents (UL)
+A deterministic-latent diffusion codec pattern where an encoder emits a clean latent, fixed noise is injected to define a modeled latent, and paired prior/decoder diffusion models optimize bitrate versus reconstruction quality.
+
+## flow-map language model (FMLM)
+A distilled few-step executor that approximates larger integration jumps from a trained continuous flow language model, enabling one-step or low-step decoding.
+
+## decoding-error-rate schedule
+A time reparameterization that allocates training and sampling effort to trajectory regions where token identities are actively resolving.
+
+## unmasking set (Γ_t)
+In editable block diffusion, masked token positions whose top prediction confidence exceeds the unmasking threshold and are therefore filled this step.
+
+## editing set (Δ_t)
+In editable block diffusion, already-filled positions where a different token prediction exceeds the edit threshold and is therefore replaced this step.
