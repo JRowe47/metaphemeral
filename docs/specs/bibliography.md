@@ -74,23 +74,23 @@ Relevance: Defines self-referential stochastic hypernetwork updates with heritab
 
 ### Perceiver IO
 Link: https://arxiv.org/abs/2107.14795
-Tag: `[background]`
-Relevance: Useful as a reference for flexible input/output interface design across modalities.
+Tag: `[paper-backed component]`
+Relevance: Establishes latent read/process/write architecture with query-driven output decoding and output-query subsampling strategies, supporting bounded multimodal ingress/egress workspaces.
 
 ### Learning to (Learn at Test Time): RNNs with Expressive Hidden States
 Link: https://arxiv.org/abs/2407.04620
-Tag: `[supporting reference]`
-Relevance: Supports discussions of online adaptation and expressive state transitions during inference-time updates.
+Tag: `[paper-backed component]`
+Relevance: Defines hidden state as inference-time trainable learner parameters with learned view projections, mini-batch updates, and dual-form acceleration for online adaptation.
 
 ### MesaNet: Sequence Modeling by Locally Optimal Test-Time Training
 Link: https://arxiv.org/abs/2506.05233
-Tag: `[supporting reference]`
-Relevance: Informs local adaptation strategies that may be adapted for offline bootstrap experiments.
+Tag: `[paper-backed component]`
+Relevance: Provides a locally optimal regression-based recurrent layer with dynamic conjugate-gradient solve depth, supporting adaptive solver-based reasoning at test time.
 
 ### Recursive Language Models
 Link: https://arxiv.org/abs/2512.24601
-Tag: `[background]`
-Relevance: Provides context for recursive decomposition and multi-pass processing relevant to deliberation routines.
+Tag: `[paper-backed component]`
+Relevance: Demonstrates REPL-mediated recursive decomposition over externalized context with constant-size root history, supporting out-of-core reasoning workflows.
 
 ## Continuous depth / adaptive compute / efficient attention
 

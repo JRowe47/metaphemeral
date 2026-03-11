@@ -79,3 +79,19 @@ A control pattern where transient entities are emitted, migrate, dock, release l
 
 ## self-referential bootstrap
 Offline initialization loop where a model (or hypernetwork) generates stochastic updates to copies of itself, evaluates descendants, and selects viable lineages.
+
+
+## latent workspace
+A fixed-size internal array used as a bounded read/process/write compute surface, typically filled from arbitrary inputs via cross-attention and read out through query-driven decoding.
+
+## output query array
+A structured set of vectors that encodes what output to extract (for example position, modality, task, or entity) when attending from outputs back into a latent workspace.
+
+## test-time training (TTT) hidden state
+A hidden-state design where the state is model parameters updated online during inference with self-supervised learning steps, rather than a static recurrent vector.
+
+## adaptive solver depth
+Inference-time policy that varies local optimization iterations (for example conjugate-gradient steps) per token/head/sequence based on stopping criteria such as residual error.
+
+## out-of-core recursive reasoning
+A context-management pattern where large inputs remain in an external environment and the model recursively decomposes/solves subproblems through tool-mediated interaction instead of loading all context into one window.
