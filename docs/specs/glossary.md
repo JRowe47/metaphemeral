@@ -93,5 +93,15 @@ A hidden-state design where the state is model parameters updated online during 
 ## adaptive solver depth
 Inference-time policy that varies local optimization iterations (for example conjugate-gradient steps) per token/head/sequence based on stopping criteria such as residual error.
 
+
+## progressive sparsification
+Training schedule that starts early routing layers with less-sparse expert participation and transitions to stricter sparse activation (for example Top-1) only after routing/load patterns stabilize.
+
+## bounded collapse
+Load-balancing target where expert traffic is allowed to remain usefully skewed, but pathological concentration (dead experts or single-expert domination) is kept below explicit safety thresholds.
+
+## thinking budget
+Explicit runtime control that caps reasoning-trace length or deliberation tokens in with-think mode before final answer emission.
+
 ## out-of-core recursive reasoning
 A context-management pattern where large inputs remain in an external environment and the model recursively decomposes/solves subproblems through tool-mediated interaction instead of loading all context into one window.

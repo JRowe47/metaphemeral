@@ -51,7 +51,7 @@ Relevance: Demonstrates product-key retrieval with singleton experts and multi-h
 ### Sigma-MoE-Tiny Technical Report
 Link: https://arxiv.org/abs/2512.16248
 Tag: `[paper-backed component]`
-Relevance: Offers practical observations about tiny MoE regimes that inform expert sizing and efficiency tradeoffs.
+Relevance: Demonstrates an extreme-sparsity MoE recipe (many small experts, Top-1 routing, progressive sparsification, and lower-layer load-balancing diagnostics), supporting Metaphemeral guidance for bounded-collapse sparse routing and staged reasoning/context growth.
 
 ### DirMoE: Dirichlet-routed Mixture of Experts
 Link: https://arxiv.org/abs/2602.09001

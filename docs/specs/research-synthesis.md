@@ -141,6 +141,28 @@ Do not over-import:
 - **Open question:** how to map expected-k controls to heterogeneous workload classes (reflex versus deliberation traffic) without destabilizing quality.
 - **Project synthesis:** cluster boundaries and scheduler coupling are Metaphemeral runtime decisions, not prescribed by DirMoE.
 
+### 8b) Extreme Top-1 sparsity with progressive stabilization (Sigma-MoE-Tiny)
+- **Paper-backed component:** Sigma-MoE-Tiny demonstrates a decoder-only MoE with up to 96 experts per MoE layer and strict Top-1 routing (one active expert per token), yielding very high total capacity with small active compute.
+- **Paper-backed component:** the report combines Group Query Attention (GQA), QK-Norm, FP32 router math, and pre-norm RMSNorm as a stability package for ultra-sparse routing.
+- **Paper-backed component:** lower layers can collapse under naive Top-1 global-batch LBL because softmax probabilities can look balanced while actual token allocations remain highly skewed.
+- **Paper-backed component:** progressive sparsification (early lower layers with multiple active experts, later transition to Top-1 everywhere) improves lower-layer load distribution while preserving target sparse runtime.
+- **Paper-backed component:** loss-free bias balancing can fail in this regime; bias terms may dominate router logits and produce hard routing collapse.
+- **Paper-backed component:** Top-1 LBL variants can improve allocation balance, but forcing near-uniform expert traffic can reduce language-model quality by suppressing useful specialization.
+- **Project synthesis:** in Metaphemeral this is the primary baseline for cluster-level extreme sparsity, with explicit measurement of real token/work allocation rather than relying only on router-probability surrogates.
+
+Keep:
+- Many-small-experts design as default sparse population shape.
+- Top-1 target runtime for tiny active compute relative to total capacity.
+- FP32 router path and normalized attention stack (GQA + QK-Norm + pre-norm RMSNorm) for routing stability.
+- Progressive sparsification schedule that gives early routing layers temporary extra participation.
+- Direct load telemetry from realized assignments (tokens/events/work), especially in earliest routing stages.
+- Balance objective tuning that allows healthy specialization skew instead of forcing strict uniformity.
+
+Do not over-import:
+- **Open question:** what transition trigger (step count, entropy threshold, or traffic-stability metric) should switch early layers into final Top-1 mode in asynchronous lattice training.
+- **Open question:** what collapse bounds should be enforced per capability cluster before rebalancing intervention is required.
+- **Project synthesis:** exact scheduler hooks, backpressure rules, and cluster-level routing controls remain runtime governance choices in this repo.
+
 ### 9) Event-driven modulation as a dynamical overlay (Neuro-Vesicles)
 - **Paper-backed component:** Neuro-Vesicles models modulation as explicit entities moving over a graph `G=(V,E)` with emission, migration, docking, release, and decay dynamics.
 - **Paper-backed component:** release operators can act on activations, parameters, learning rules, or external memory, with differentiable density relaxations and RL control variants.
@@ -396,6 +418,33 @@ Do not over-import:
 
 **Purpose in Metaphemeral:** scalable handling of contexts larger than local windows via recursive environment-coupled computation.
 
+### Algorithm O — Extreme-sparsity expert training (from Sigma-MoE-Tiny)
+1. Use a high expert count per layer/cluster with small expert modules.
+2. Set a tiny active subset target (for example Top-1 per token/event) for runtime operation.
+3. Stabilize routing stack with FP32 router math, attention/logit normalization, and pre-norm layers.
+4. Monitor realized token/work assignment per expert instead of only router softmax moments.
+5. Track collapse indicators (min-load expert share, max-load concentration, dead-expert count) in early layers.
+
+**Purpose in Metaphemeral:** establish a practical operating regime where total expert capacity is large but active compute remains minimal.
+
+### Algorithm P — Progressive sparsification (from Sigma-MoE-Tiny)
+1. Initialize with target expert count per layer/cluster.
+2. Keep earliest routing layers temporarily less sparse than final target.
+3. Keep later routing layers at target sparse regime from the start.
+4. Measure lower-layer allocation stability on realized traffic.
+5. Transition all layers to final Top-1 only after stability criteria are met.
+
+**Purpose in Metaphemeral:** reach ultra-sparse runtime without early-layer routing collapse.
+
+### Algorithm Q — Sparse reasoning curriculum (from Sigma-MoE-Tiny)
+1. Extend context length in stages rather than one jump.
+2. Increase supervision/task difficulty alongside longer contexts.
+3. Train both explicit-reasoning and minimal-reasoning formats.
+4. Expose an explicit runtime thinking-budget control at inference.
+5. Keep with-think and without-think operating modes available.
+
+**Purpose in Metaphemeral:** stage reasoning growth and context expansion while keeping runtime reasoning depth controllable.
+
 ## Recommended synthesis for current project stage
 - **Project synthesis:** use D2NWG-style machinery for context-conditioned spawning.
 - **Project synthesis:** use DeepWeightFlow-style machinery for fast full-weight generation when direct flow is cheaper.
@@ -411,6 +460,9 @@ Do not over-import:
 - **Project synthesis:** use TTT-style hidden-state learning when persisted L1 state should adapt online through self-supervised updates.
 - **Project synthesis:** use Mesa-style local optimization with dynamic solver stops for variable-depth reasoning inside active experts.
 - **Project synthesis:** use RLM-style recursive environment interaction for out-of-core contexts that exceed local windows.
+- **Project synthesis:** use Sigma-MoE-Tiny-style progressive sparsification to reach Top-1 expert activation without lower-layer collapse.
+- **Project synthesis:** treat load balancing as bounded-collapse control over real traffic, not as strict-uniform routing.
+- **Project synthesis:** stage long-context and reasoning-depth growth with an explicit runtime thinking-budget control.
 
 ## Project synthesis vs paper-backed components
 
@@ -433,6 +485,7 @@ Do not over-import:
 - TTT-style hidden state as an inference-time trainable learner.
 - MesaNet-style locally optimal solver-based sequence update with dynamic CG depth.
 - Recursive Language Model style REPL-mediated out-of-core recursion over environment context.
+- Extreme Top-1 sparse MoE operation with progressive sparsification and lower-layer load diagnostics (Sigma-MoE-Tiny).
 
 ### Project synthesis
 - Only-L1-persists runtime model.
@@ -450,6 +503,8 @@ Do not over-import:
 - Policy limits for online L1 adaptation rates and commit frequency.
 - Runtime residual thresholds and iteration caps for solver-based reasoning loops.
 - Tool permissions, recursion-depth caps, and watchdog behavior for out-of-core recursive loops.
+- Scheduler thresholds for sparsification-phase transitions and collapse intervention.
+- Runtime policy for thinking-budget defaults and switching between with-think/without-think modes.
 
 ## Contributor interpretation
 - D2NWG gives a practical pattern for generating weights from context.
@@ -466,6 +521,7 @@ Do not over-import:
 - TTT layers give a practical pattern for hidden states that learn online during inference.
 - MesaNet gives a practical pattern for local optimal solves with adaptive per-token compute.
 - Recursive Language Models give a practical pattern for recursive out-of-core context handling through environment tools.
+- Sigma-MoE-Tiny gives a practical pattern for extreme sparsity, progressive stabilization, and staged reasoning/context growth.
 
 For this repo stage:
 - **Project synthesis:** L1 persistence should be trajectory-informed.
@@ -481,3 +537,6 @@ For this repo stage:
 - **Project synthesis:** cells should use TTT-style adaptation when persisted L1 must improve from ongoing local experience.
 - **Project synthesis:** experts should use Mesa-style solver loops when variable reasoning depth is worth extra FLOPs.
 - **Project synthesis:** out-of-core problems should use RLM-style recursive environment interaction instead of forcing full context into root windows.
+- **Project synthesis:** extreme sparse society training should begin with progressive lower-layer participation and converge into Top-1 only after routing stabilizes.
+- **Project synthesis:** balancing should optimize for healthy specialization with bounded collapse, not strict traffic uniformity.
+- **Project synthesis:** inference should preserve explicit with-think/without-think modes and expose thinking budget as a first-class runtime knob.
