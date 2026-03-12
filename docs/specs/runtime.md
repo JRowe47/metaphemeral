@@ -93,6 +93,19 @@ Required per-candidate observability fields:
    - Scenario: packet tagged `capability=temporal-repair` with no fixed destination.
    - Policy: apply hybrid `k_primary + k_explore` recipient selection and fairness boost rules under high fan-in.
 
+## Multimodal codec policy baseline
+- **Paper-backed component:** Unified Latents (UL) provides the encoder/prior/decoder latent codec pattern used as the baseline family for reconstructible heavy artifacts (see [research synthesis](research-synthesis.md#4-unified-latent-codec-training-unified-latents-ul) and [bibliography](bibliography.md#codec--latent-workspace--adaptation)).
+- **Project synthesis:** simulator v1 adopts a **shared codec family** policy: all modalities use UL-compatible codec profiles, while per-modality differences are represented as profile parameters (`codec_profile_id`, bitrate budget, fidelity target), not separate codec families.
+- **Project synthesis:** modality-specific adapters remain allowed at ingress/egress boundaries, but adapter outputs must map into the shared codec family before handle publication.
+
+Operational requirements for v1:
+1. Every handle-referenced payload must carry `codec_profile_id` and reconstruction diagnostics in the trace packet.
+2. Routing and scheduling logic consume modality-agnostic codec diagnostics (`estimated_decode_cost`, `reconstruction_confidence`) instead of modality-specific codec internals.
+3. New modality onboarding must declare a UL-compatible profile before benchmark admission.
+
+Fallback path:
+- **Open question:** if a modality repeatedly fails shared-family acceptance thresholds during validation, we may trial a modality-specific codec in a feature-flagged path, but only after documenting replay-equivalence impact and rollback semantics in [decision log](decision-log.md).
+
 ## Interrupts, escalation, and reflex triggers
 Interrupt sources include:
 - overflow risk in activation store,

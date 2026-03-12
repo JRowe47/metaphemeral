@@ -40,7 +40,7 @@ Decision checkpoint (linked to runtime evaluation protocol):
 - How should baseline activity targets adapt across modalities?
 
 ## 7) Multimodal codec strategy
-- Should modalities share one latent codec family or use modality-specific codecs with a shared adapter?
+- Baseline policy decision: simulator v1 uses a shared UL-compatible codec family with modality-specific profiles/adapters; see [runtime codec baseline](runtime.md#multimodal-codec-policy-baseline).
 - How do codec errors propagate through handle-based activation references?
 - What compression level is acceptable before routing quality degrades?
 

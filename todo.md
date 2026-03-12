@@ -115,7 +115,7 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] For each deferred item, define re-evaluation trigger.
 
 ### K. Codec and multimodal policy definition
-- [ ] Decide shared codec family vs modality-specific codecs + shared adapter.
+- [x] Decide shared codec family vs modality-specific codecs + shared adapter.
 - [ ] Define acceptable compression/quality envelope before routing degradation.
 - [ ] Define error-propagation handling for handle-referenced payload compression.
 
