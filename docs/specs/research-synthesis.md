@@ -5,6 +5,71 @@ Related specs: [architecture](architecture.md), [runtime](runtime.md), [training
 ## Scope
 This document maps external research results to Metaphemeral runtime needs. It separates **paper-backed components** from **project synthesis** and keeps the only-L1-persists rule explicit.
 
+## Milestone J adoption matrix (simulator planning)
+
+Plain-English summary: this matrix decides which paper-backed components are in the first simulator baseline, which are deferred, and which are currently rejected so the team can plan interfaces without implying implementation completeness.
+
+### Status matrix
+
+| Component | Status | Required preconditions | Primary risks |
+| --- | --- | --- | --- |
+| D2NWG conditional weight generation | Adopted now | Weight-zoo curation quality gates and a validated latent codec path | Context-to-weight mismatch can spawn unstable experts |
+| DeepWeightFlow direct full-weight flow matching | Deferred | Stable canonicalization pipeline and generation-time quality checks | Permutation/canonicalization errors can invalidate generated weights |
+| Neural-manifold trajectory modeling | Deferred | Trajectory logging standard and commit-path evaluation metrics | Manifold coordinates may omit memory-critical state |
+| Unified Latents (UL) codec training | Adopted now | Bitrate budget policy and decode-fidelity acceptance tests | Over-compression can increase rollback via reconstruction loss |
+| FLM/FMLM continuous flow language execution | Deferred | Shared token-simplex observability and executor parity harness | Flow decoding may exceed reflex latency budget |
+| LLaDA2.1 editable block diffusion execution | Adopted now | Block-mask schema and rollback-safe edit constraints | Block edit drift can reduce trace clarity under load |
+| PEER sparse tiny-expert retrieval | Adopted now | Expert-key index format and ANN recall floor targets | Retrieval misses can increase starvation under burst traffic |
+| DirMoE differentiable sparse probabilistic routing | Adopted now | Routing temperature policy and capacity-throttle coupling | Router collapse can create fairness regressions |
+| Neuro-Vesicles event modulation overlay | Adopted now | Event schema for vesicle birth/merge/decay and bounded aging rules | Unbounded vesicle growth can violate pressure guardrails |
+| Self-referential GHN bootstrap | Deferred | Offline sandbox for lineage evaluation and safety gating | Self-modification instability can poison seed populations |
+| Perceiver IO latent workspace | Adopted now | Fixed latent-array budget and output-query schema by modality | Query-schema drift can break multimodal interoperability |
+| TTT layers online learner state | Deferred | Safe in-tick update bounds and reproducibility checks | Online adaptation can undermine replay determinism |
+| MesaNet solver-based sequence updates | Deferred | Solver residual telemetry and per-plane iteration ceilings | Solver overruns can violate latency envelopes |
+| Neural ODE continuous-depth execution | Deferred | ODE tolerance policy and solver-stability benchmarks | Stiff dynamics can cause unpredictable runtime cost |
+| SATA constant-cost attention | Deferred | Kernel-approximation error thresholds and history-state schema | Approximation error may degrade long-horizon reasoning quality |
+| NEAT evolutionary bootstrap | Adopted now (offline bootstrap) | Fitness curriculum, species retention rules, and promotion gates | Reward hacking can produce brittle but high-scoring seeds |
+| Mono-Forward local layerwise learning | Deferred | Local objective alignment checks against system-level success metrics | Local optima can diverge from global task utility |
+| Muon matrix-aware optimization | Adopted now (training stack) | Matrix/non-matrix parameter partitioning and RMS normalization checks | Mis-partitioning can destabilize heterogeneous modules |
+| Recursive Language Models out-of-core recursion | Deferred | Tool-permission sandbox and recursion-depth guardrails | Recursive loops can create runaway tool usage |
+
+### Minimal simulator-facing interface assumptions for adopted items
+
+- **Project synthesis:** Adopted components expose simulator contracts without requiring full training-stack implementation inside the simulator.
+
+| Adopted component | Minimal simulator-facing interface assumptions |
+| --- | --- |
+| D2NWG | `spawn_request(context_handle, capability_tag)` returns either `expert_handle` plus provenance metadata or a typed failure reason for rollback logging. |
+| UL codec | `encode(object_ref, codec_profile)` and `decode(latent_handle, fidelity_target)` are deterministic under fixed seeds and emit reconstruction diagnostics. |
+| LLaDA2.1 block diffusion | `edit_blocks(base_handle, block_mask, constraint_profile)` returns edited proposal plus per-block confidence and rollback hints. |
+| PEER | `retrieve_experts(query_vec, k, route_budget)` returns ranked expert handles with similarity scores and admission-throttle annotations. |
+| DirMoE | `route_probs(packet_features, capacity_snapshot)` returns sparse route distribution plus fairness counters and dropped-route reasons. |
+| Neuro-Vesicles | `apply_event_modulation(event_packet, local_state)` updates bounded vesicle fields and outputs modulatory deltas with decay metadata. |
+| Perceiver IO | `workspace_ingest(input_array, modality_tag)` and `workspace_emit(query_array)` must preserve fixed latent budget and report truncation flags. |
+| NEAT (offline bootstrap) | `evaluate_genome(seed_genome, bootstrap_taskset)` outputs fitness vector, species id, and promotion recommendation artifact. |
+| Muon (training stack) | `optimizer_step(param_partition, grad_partition)` records matrix orthogonalization diagnostics and parameter-group drift stats. |
+
+### Deferred-component re-evaluation triggers
+
+- **Project synthesis:** Deferred components are not rejected; they move into active planning only when evidence gates are met.
+
+| Deferred component | Re-evaluation trigger |
+| --- | --- |
+| DeepWeightFlow | Promote when generation latency beats D2NWG by target margin while matching stability thresholds on shared spawn tasks. |
+| Neural-manifold modeling | Promote when trajectory-informed models reduce rollback rate versus endpoint-only baselines over mixed-load traces. |
+| FLM/FMLM | Promote when flow executor meets reflex and deliberation latency envelopes on mandatory benchmark tasks. |
+| Self-referential GHN bootstrap | Promote when sandbox runs demonstrate lineage stability and no safety-policy violations across checkpoint horizon. |
+| TTT layers | Promote when online adaptation improves correction stability without reducing replay equivalence scores. |
+| MesaNet | Promote when adaptive-iteration policy improves accuracy-latency tradeoff against fixed-depth baselines under identical budgets. |
+| Neural ODEs | Promote when solver-controlled depth shows bounded p95 latency variance and stable rollback behavior. |
+| SATA | Promote when approximation error stays under threshold while materially reducing long-history compute cost. |
+| Mono-Forward | Promote when local-learning modules improve task metrics without increasing cross-module inconsistency incidents. |
+| Recursive Language Models | Promote when recursion-depth and tool-sandbox guardrails pass red-team stress scenarios. |
+
+### Current rejected set
+
+- **Project synthesis:** No paper-backed component is fully rejected at this milestone; all non-adopted items remain deferred with explicit validation triggers.
+
 ## Research-backed components we are borrowing
 
 ### 1) Conditional weight generation in latent space (D2NWG)
