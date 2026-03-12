@@ -76,6 +76,11 @@ The architecture assumes many tiny experts and sparse selection per event.
 ## Executor options
 Execution backends for generated L2/L3 routines are intentionally modular.
 
+### Terminology normalization (spec contribution rule)
+- **Project synthesis:** use **generated routine** for transient runtime behavior instances and reserve **modality executor** for named backend families (for example flow-based or block diffusion language executors).
+- **Project synthesis:** avoid using the standalone word **executor** to describe generic runtime behavior unless the sentence refers to a specific modality executor family.
+- **Project synthesis:** contributors introducing a new term must satisfy the [term introduction checklist](glossary.md#term-introduction-checklist) and add/update glossary entries in the same change.
+
 ### Few-step flow-based language executor
 - **Paper-backed component:** motivated by flow-based/continuous denoising generation results (see [bibliography](bibliography.md#executor-options--few-step-generation)).
 - Intended use: low-latency deliberation bursts where limited iterative depth is acceptable.

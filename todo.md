@@ -90,15 +90,15 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 - [x] Start with the 4 near-term validation priorities from `open-questions.md`.
 
 ### H. Formalize safety and rollback policy variants
-- [ ] Define whether partial-accept rollback mode will exist in v1 simulator semantics.
-- [ ] Document guardrail thresholds that force rollback vs defer vs quarantine.
-- [ ] Specify reflex escalation actions for repeated failed deliberation traces.
-- [ ] Add examples of safe degradation under overload.
+- [x] Define whether partial-accept rollback mode will exist in v1 simulator semantics.
+- [x] Document guardrail thresholds that force rollback vs defer vs quarantine.
+- [x] Specify reflex escalation actions for repeated failed deliberation traces.
+- [x] Add examples of safe degradation under overload.
 
 ### I. Make glossary enforcement operational
-- [ ] Add “term introduction checklist” to spec contribution workflow.
-- [ ] Ensure new terms are entered in glossary with concise, implementation-oriented definitions.
-- [ ] Normalize terminology where docs currently use variants (e.g., generated routine/executor wording).
+- [x] Add “term introduction checklist” to spec contribution workflow.
+- [x] Ensure new terms are entered in glossary with concise, implementation-oriented definitions.
+- [x] Normalize terminology where docs currently use variants (e.g., generated routine/executor wording).
 
 ---
 

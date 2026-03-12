@@ -142,7 +142,52 @@ Rollback guarantees:
 - failed trace id is marked,
 - retry policy is delegated to scheduler.
 
-**Open question:** whether rollback should include selective partial-accept mode.
+### Rollback acceptance mode (v1 simulator default)
+- **Project synthesis:** selective partial-accept rollback is **disabled** for v1 simulator semantics to preserve replay determinism and simplify audit trails.
+- **Project synthesis:** each tick resolves to exactly one terminal state for commit handling: `commit_all`, `defer_all`, `rollback_all`, or `quarantine_tick`.
+- **Open question:** partial-accept can be revisited in a later milestone once determinism and replay equivalence are demonstrated under mixed accepted/rejected field updates.
+
+### Guardrail thresholds and mandatory action policy
+- **Project synthesis:** guardrail outcomes are action-typed by severity so reflex handlers can react consistently across workloads.
+
+| Guardrail condition | Trigger threshold (symbolic) | Required action | Observability requirement |
+| --- | --- | --- | --- |
+| Dependency gap on required handle chain | `missing_required_dependencies > 0` | `rollback_all` | Record missing handle ids and first broken edge in rollback payload |
+| Safety policy violation | `safety_violation_count > 0` | `quarantine_tick` | Record violated policy id, originating packet id, and applied quarantine TTL |
+| Resource saturation without safety violation | `resource_pressure >= pressure_hard_limit` | `defer_all` | Record pressure snapshot and deferred packet count by route bucket |
+| Trace schema incompleteness | `required_trace_fields_missing > 0` | `rollback_all` | Record exact required fields missing from debug packet |
+| Soft overload with valid dependency/safety checks | `pressure_soft_limit <= resource_pressure < pressure_hard_limit` | `commit_all` with throttle metadata | Record throttle counters and delayed emission queue depth |
+
+### Reflex escalation for repeated deliberation failure
+- **Project synthesis:** repeated deliberation failures trigger reflex-plane escalation to prevent unbounded retry loops.
+
+Escalation ladder for identical `failure_class` over a sliding `failure_window_ticks`:
+1. **Level 0 (observe):** first failure, mark trace and allow standard retry budget.
+2. **Level 1 (throttle):** if `failure_count >= failure_throttle_threshold`, cut deliberation retry budget by `retry_budget_reduction_factor`.
+3. **Level 2 (quarantine path):** if `failure_count >= failure_quarantine_threshold`, route matching class packets to reflex-safe fallback template for `quarantine_duration_ticks`.
+4. **Level 3 (operator alert):** if `failure_count >= failure_alert_threshold`, emit `operator_attention_required` event and freeze new deliberation attempts for that class until cooldown expiry.
+
+Required L1 metadata updates when escalation changes level:
+- `safety_state.last_failure_class`
+- `safety_state.escalation_level`
+- `safety_state.cooldown_until_tick`
+- `safety_state.last_reflex_action`
+
+### Safe degradation examples under overload
+- **Project synthesis:** these examples are normative simulator behaviors for overload handling while preserving only-L1-persists constraints.
+
+1. **Neighbor flood + low safety risk**
+   - Condition: neighbor bucket depletion with no safety-class violations.
+   - Degradation action: coalesce low-priority neighbor packets, defer deliberation emissions, keep reflex acknowledgements live.
+   - Terminal state: `commit_all` with throttle metadata.
+2. **Capability storm + fairness stress**
+   - Condition: sustained high fan-in and rising starvation counters.
+   - Degradation action: temporarily shrink `k_explore`, enforce stricter `max_assignments_per_tick`, and emit backpressure signals.
+   - Terminal state: `defer_all` if pressure crosses hard limit; otherwise `commit_all` with fairness override annotations.
+3. **Repeated dependency-gap deliberation traces**
+   - Condition: same dependency class fails repeatedly within `failure_window_ticks`.
+   - Degradation action: invoke escalation ladder to quarantine the failing deliberation class and route minimal safe reflex response.
+   - Terminal state: `rollback_all` for failed trace tick plus cooldown metadata commit.
 
 ## Executor evaluation protocol (v0 simulator milestone)
 - **Project synthesis:** this protocol defines how to compare flow-based and block-diffusion executors under shared tasks and observability constraints.

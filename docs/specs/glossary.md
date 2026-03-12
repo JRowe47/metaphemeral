@@ -114,6 +114,21 @@ A local layer output produced by projecting activations into class-conditioned g
 ## Muon update
 A matrix-optimizer step that orthogonalizes momentum-like matrix gradients via Newton–Schulz iteration, then applies shape-aware scaling and weight decay before updating parameters.
 
+## term introduction checklist
+A required checklist for adding new terminology in spec docs.
+
+- **Project synthesis:** term appears first in an implementation-facing sentence before abstract discussion.
+- **Project synthesis:** term is added to this glossary in the same change with a concise, simulator-relevant definition.
+- **Project synthesis:** introducing spec section labels substantive claims as Paper-backed component, Project synthesis, or Open question.
+- **Project synthesis:** related docs are cross-linked with relative links, including the source spec where the term is first used.
+- **Project synthesis:** if term implies a literature-backed mechanism, bibliography coverage is verified or updated in the same change.
+
+## generated routine
+Transient L2/L3 behavior instance produced for a tick from L1 state and current context. Use this term in runtime behavior descriptions instead of generic "executor" unless specifically naming a modality executor family (for example flow-map or block diffusion).
+
+## modality executor
+A concrete execution family (for example flow-map language model or block diffusion editor) used to realize generated routines for a modality-specific output path.
+
 ## L1 record
 The full persisted per-address state envelope validated and written at commit boundaries (schema version, routing profile, safety state, provenance, and lifecycle metadata).
 
