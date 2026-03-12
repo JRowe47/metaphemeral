@@ -105,14 +105,14 @@ Related docs: [README](README.md), [Architecture](docs/specs/architecture.md), [
 ## P2 — Medium-term (research integration and policy hardening)
 
 ### J. Research-synthesis adoption matrix
-- [ ] Create a matrix mapping each imported paper-backed component to:
-  - [ ] adopted now,
-  - [ ] deferred,
-  - [ ] rejected,
-  - [ ] required preconditions,
-  - [ ] risks.
-- [ ] For each adopted item, define minimal simulator-facing interface assumptions.
-- [ ] For each deferred item, define re-evaluation trigger.
+- [x] Create a matrix mapping each imported paper-backed component to:
+  - [x] adopted now,
+  - [x] deferred,
+  - [x] rejected,
+  - [x] required preconditions,
+  - [x] risks.
+- [x] For each adopted item, define minimal simulator-facing interface assumptions.
+- [x] For each deferred item, define re-evaluation trigger.
 
 ### K. Codec and multimodal policy definition
 - [ ] Decide shared codec family vs modality-specific codecs + shared adapter.
